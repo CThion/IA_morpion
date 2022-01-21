@@ -104,6 +104,10 @@ class Morpion(Game):
         elif phase!=0 and timer > pierres+2*nbl: 
           print(7)
           return False 
+        #--
+        if nbO+nbX < pierres and timer>nbO+nbX: 
+          print(8)
+          return False
         #--all checks passed
         return True
     
