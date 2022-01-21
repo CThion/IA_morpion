@@ -6,3 +6,5 @@ arg c'est pour valeur simple (dans un tuple), Kwarg c'est pour les affectations 
 
 ### property
 pour masquer les valeurs, permet d'utiliser les fonctions comme des variables.
+
+len([index for index, element in enumerate(move) if element == 'O'])

@@ -11,6 +11,9 @@ class Morpion(Game):
         le premier joueur a les pierres 'X'
         le second joueur a les pierres 'O'
         les cases vides sont représentées par '.'
+        -----
+        valeur intière: = cfg[1] = timer = sorte d'indice du tour courrant
+        phase: \in (0,1,2), constante définie en début de partie, détermine mouvement possible dans la seconde partie du jeu
     """
     PAWN = ".XO"
     def __init__(self, taille:int=3, tore:bool=False,
@@ -24,7 +27,7 @@ class Morpion(Game):
         # on crée une variable pour stocker les informations
         self.__init_board = copy.deepcopy(board)
         # les variables utiles
-        stones = (size*size -1)
+        stones = (size*size -1) #nombre de pierres totales
         lines = {3:3, 5:4, 7:5}
         # on crée une variable pour stocker l'information
         self.__init_board = copy.deepcopy(board)
@@ -58,32 +61,50 @@ class Morpion(Game):
         
     @property
     def hash_code(self) -> str:
-        return ''.join([''.join([c for c in l])
-                        for l in self.board])
+        """convert board state into a lingle line string"""
+        return ''.join([''.join([c for c in l]) for l in self.board])
 
     def valid_state(self, cfg:tuple):
         """ check that the cfg is valid :"""
         nbl = self.get_parameter('nbl')
-        #1.  Que le tuple est de taille 2
+        pierres = self.get_parameter('pierres')
+        phase = self.get_parameter('phase')
+        #--le tuple est de taille 2
         if len(cfg)!=2: return False
-        cfg, turn = cfg[0], cfg[1]
-        #2.  Que la première valeur est une chaîne de caractères de la bonne longueur
-        if type(cfg)!=str or len(cfg)!= nbl**2: return False
-        #3.  Que la seconde valeur est un entier
-        if type(turn)!=int: return False
-        #4.  Que la chaîne ne contient que des valeurs dans self.PAWN
-        for c in cfg : 
-            if c not in self.PAWN : return False
-        #--
-        nbX = len([index for index, element in enumerate(cfg) if element == 'X'])
-        nbO = len([index for index, element in enumerate(cfg) if element == 'O'])
-        nbstone=(nbl**2-1)/2
-        if nbO > nbstone or nbX > nbstone:
-            print("pas1")
-            return False
+        move, timer = cfg[0], cfg[1]
+        #--première valeur est une string de la bonne longueur
+        if type(move)!=str or len(move)!= nbl**2: 
+          print(1)
+          return False
+        #--la seconde valeur est un entier
+        if type(timer)!=int: 
+          print(2)
+          return False
+        #--la chaîne ne contient que des valeurs dans self.PAWN
+        for _ in move : 
+            if _ not in self.PAWN : 
+              print(3)
+              return False
+        #----stone check
+        nbX = move.count('X'); nbO = move.count('O') #nombre X et O
+        #--nombre de ’X’ et le nombre de ’O’ sont compatibles avec timer
+        if nbO+nbX > timer: 
+          print(4)
+          return False
+        #--nombre de ’X’ est égal au nombre de ’O’ ou au nombre de ’O’+1
         if nbX not in (nbO, nbO+1): 
-            print('pas2')
-            return False
+          print(5)
+          return False
+        #----phase check
+        #--si phase==0, timer n’excède pas le nombre de pierres
+        if phase == 0 and timer > pierres: 
+          print(6)
+          return False
+        #--si phase!=0, timer n’excède pas la limite du temps de jeu
+        elif phase!=0 and timer > pierres+2*nbl: 
+          print(7)
+          return False 
+        #--all checks passed
         return True
     
     @property
@@ -92,6 +113,7 @@ class Morpion(Game):
     @state.setter
     def state(self, cfg:tuple):
         """ change board and timer """
+        print("in")
         if not self.valid_state(cfg): return
         super().reset() # no history
         _, self.timer = cfg
@@ -105,11 +127,16 @@ class Morpion(Game):
     
 if __name__ == "__main__":
     a=Morpion()
-    t = ("XOX..OOOO", 3) #XOX...... 
+    t = ("XOXXXOOOO", 0) #XOX...... 
     a.valid_state(t)
     code = '''
 jeu = Morpion()
 jeu # test repr
+
+print(jeu) #affichage board
+
+jeu.state= ("......X..", 0) #True
+jeu.state
 
 jeu.state == (".........", 0) # True
 
@@ -121,7 +148,7 @@ jeu.get_parameter('nbcol') # renvoie rien
 jeu.PAWN
 
 _t = "XOX......", 3
-jeu.valid_state( _t )
+jeu.valid_state( _t ) #True
 
 _u = "XOX...XOO", 2
 jeu.valid_state( _u ) # False
@@ -142,4 +169,4 @@ jeu.valid_state( _v ) # False
 
 _v = "XOXOXXOO."+'.'*40, 8
 jeu.valid_state( _v ) # True
-''' ; #testcode(code)
+''' ; testcode(code)
