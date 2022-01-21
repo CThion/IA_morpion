@@ -63,15 +63,28 @@ class Morpion(Game):
 
     def valid_state(self, cfg:tuple):
         """ check that the cfg is valid :"""
-        prmt = self.get_parameter('nbl')
-        print(prmt)
+        nbl = self.get_parameter('nbl')
         #1.  Que le tuple est de taille 2
-        if len(cfg)!=2: return
+        if len(cfg)!=2: return False
+        cfg, turn = cfg[0], cfg[1]
         #2.  Que la première valeur est une chaîne de caractères de la bonne longueur
-        
+        if type(cfg)!=str or len(cfg)!= nbl**2: return False
         #3.  Que la seconde valeur est un entier
-        #4.  Que la chaîne ne contient que des valeurs dansself.PAWN
-        return False
+        if type(turn)!=int: return False
+        #4.  Que la chaîne ne contient que des valeurs dans self.PAWN
+        for c in cfg : 
+            if c not in self.PAWN : return False
+        #--
+        nbX = len([index for index, element in enumerate(cfg) if element == 'X'])
+        nbO = len([index for index, element in enumerate(cfg) if element == 'O'])
+        nbstone=(nbl**2-1)/2
+        if nbO > nbstone or nbX > nbstone:
+            print("pas1")
+            return False
+        if nbX not in (nbO, nbO+1): 
+            print('pas2')
+            return False
+        return True
     
     @property
     def state(self) -> tuple:
@@ -92,7 +105,7 @@ class Morpion(Game):
     
 if __name__ == "__main__":
     a=Morpion()
-    t = ("XOX......", 3)
+    t = ("XOX..OOOO", 3) #XOX...... 
     a.valid_state(t)
     code = '''
 jeu = Morpion()
