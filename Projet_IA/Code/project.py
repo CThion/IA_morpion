@@ -147,9 +147,10 @@ class Morpion(Game):
         
     
 if __name__ == "__main__":
-    jeu=Morpion()
-    _t = "XXXOO....", 5
+    jeu=Morpion(phase=1)
+    _t = "XXXX.OOOO", 8 
     jeu.valid_state( _t ) #True
+    print(jeu.valid_state( _t ) )
     code = '''
 jeu = Morpion()
 jeu # test repr
