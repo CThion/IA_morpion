@@ -23,7 +23,7 @@ class Player:
                  jeu:any=None, **kargs):
         """ nom: le nom du joueur pour l'affichage si on le souhaite
             jeu: le jeu auquel on veut faire joueur
-            kargs: un dictionnaire permettant qui sera utile
+            kargs: un dictionnaire permettant de stocker ce qui sera utile
         """
         # on verifie que l'on a tout ce qui nous est nécessaire
         # pour travailler

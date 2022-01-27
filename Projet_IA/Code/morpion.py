@@ -21,8 +21,6 @@ class Morpion(Game):
         # on définit la grille de jeu
         board = [ [ self.PAWN[0] for _ in range(size) ]
                   for _ in range(size) ]
-        # on crée une variable pour stocker les informations
-        self.__init_board = copy.deepcopy(board)
         # les variables utiles
         stones = (size*size -1)
         lines = {3:3, 5:4, 7:5}
@@ -32,7 +30,7 @@ class Morpion(Game):
         # Von Neumann, Moore
         self.__vicinity = [[ (-1,0), (0, 1), (1,0), (0,-1) ],
                            [ (i,j) for i in (-1,0,1) for j in (-1,0,1)
-                             if (i != 0 and j != 0)]]
+                             if (i != 0 or j != 0)]]
         super().__init__(nbl=size, nbc=size,
                          pierres=stones, ligne=lines[size],
                          tore=bool(tore), phase=style)
@@ -72,7 +70,7 @@ class Morpion(Game):
     def state(self, cfg:tuple):
         """ change board and timer """
         if not self.valid_state(cfg): return
-        super().reset() # no history
+        self.reset() # no history
         _, self.timer = cfg
         _free = []
         for i,x in enumerate(_):

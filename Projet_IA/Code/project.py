@@ -3,7 +3,8 @@
 
 from classes.abstract_game import Game
 from tools.ezCLI import testcode
-from tools.outils import p2c
+import tools.outils as tool
+
 import copy
 
 class Morpion(Game):
@@ -67,13 +68,15 @@ class Morpion(Game):
     def valid_state(self, cfg:tuple):
         """ check that the cfg is valid :"""
         nbl = self.get_parameter('nbl')
+        nbc = self.get_parameter('nbc')
         pierres = self.get_parameter('pierres')
         phase = self.get_parameter('phase')
+        ligne = self.get_parameter('ligne')
         #--le tuple est de taille 2
         if len(cfg)!=2: return False
         move, timer = cfg[0], cfg[1]
         #--première valeur est une string de la bonne longueur
-        if type(move)!=str or len(move)!= nbl**2: 
+        if type(move)!=str or len(move)!= nbl*nbc: 
           print(1)
           return False
         #--la seconde valeur est un entier
@@ -86,7 +89,7 @@ class Morpion(Game):
               print(3)
               return False
         #----stone check
-        nbX = move.count('X'); nbO = move.count('O') #nombre X et O
+        nbX = move.count(self.PAWN[1]); nbO = move.count(self.PAWN[2]) #nombre X et O
         #--nombre de ’X’ et le nombre de ’O’ sont compatibles avec timer
         if nbO+nbX > timer: 
           print(4)
@@ -108,7 +111,7 @@ class Morpion(Game):
         if nbO+nbX < pierres and timer>nbO+nbX: 
           print(8)
           return False
-        #--all checks passed
+        #--tous les tests sont passés
         return True
     
     @property
@@ -130,9 +133,9 @@ class Morpion(Game):
         
     
 if __name__ == "__main__":
-    a=Morpion()
-    t = ("XOXXXOOOO", 0) #XOX...... 
-    a.valid_state(t)
+    jeu=Morpion()
+    _t = "XXXOO....", 5
+    jeu.valid_state( _t ) #True
     code = '''
 jeu = Morpion()
 jeu # test repr

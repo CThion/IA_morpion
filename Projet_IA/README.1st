@@ -1,0 +1,22 @@
+Supposons que vous travailliez dans le fichier projet.py
+
+Vous souhaitez passer les tests
+1/ chargez le fichier main_tests.py dans votre environnement python3
+   (idle3 ou spyder3)
+2/ lancez l'exécution (touche F5 ou menu RUN pour idle3,
+   flêche verte dans la barre de menu pour spyder3)
+3/ on vous demande de saisir le nom de votre fichier (ici projet)
+4/ A la question "Passez tous les tests ?" appuyez sur la touche entrée
+   (ou tapez 1 suivi de la touche entrée)
+5/ A la question "Tests du jalon 01 ?" tapez 0 suivi de entrée
+6/ A la question "Test de hexapawn ?" tapez 0 si vous travaillez sur hexapawn
+   tapez 1 si vous travaillez sur morpion. Après le chiffre, appuyez sur la
+   touche entrée
+7/ A la question "Test de morpion ?" tapez 1 si vous travaillez sur hexapawn,
+   0 si vous travaillez sur le morpion. Après le chiffre, appuyez sur la
+   touche entrée
+
+8/ Pour toutes les autres questions répondez 1 suivi de la touche entrée
+
+Pour Hexapawn: il y a 13 tests à passer (à la date du 25.01.22)
+Pour Morpion: il y a 13 tests à passer (à la date du 25.01.22)
