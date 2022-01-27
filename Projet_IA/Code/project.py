@@ -111,6 +111,20 @@ class Morpion(Game):
         if nbO+nbX < pierres and timer>nbO+nbX: 
           print(8)
           return False
+        #--teste tous les alignements
+        nbalign=0 #compteur d'alignement
+        #parcours des liste de str d'orientation
+        for func in [tool.lines,
+                        tool.columns,
+                        lambda s, l, c: tool.diag_moins(s, l, c, self.get_parameter('tore')),
+                        lambda s, l, c: tool.diag_plus(s, l, c, self.get_parameter('tore'))]:  
+          vectList = func(move, nbl, nbc)
+          print('vectList', vectList)
+          for vect in vectList: #parcours des str de la liste
+            if ligne*self.PAWN[1] in vect or ligne*self.PAWN[2] in vect: #'OOO' or 'XXX' for 3*3
+              nbalign +=1 #nouvel alignement trouvé
+              print('nbalign', nbalign)
+          if nbalign > 1: return False
         #--tous les tests sont passés
         return True
     
