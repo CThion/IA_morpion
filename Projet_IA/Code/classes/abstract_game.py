@@ -24,11 +24,7 @@ class Game:
 
     def get_parameter(self, att:str) -> any:
         """ given a parameter provides value 
-            les attributs valides: 
-            * nbl le nombre de lignes
-            * nbc le nombre de colonnes
-            * cylindre est-on en mode cylindre ou non
-            * priorite est-on obligé de 'manger'
+            les attributs valides: sont dans self.key_arguments
         """
         return self.__kargs.get(att, None)
     
@@ -45,7 +41,6 @@ class Game:
     def pop_history(self):
         """ go one step back """
         if self.__history != []:
-            self.timer -= 1
             return self.__history.pop(-1)
 
     def __repr__(self):

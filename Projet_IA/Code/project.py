@@ -4,7 +4,7 @@
 from classes.abstract_game import Game
 from tools.ezCLI import testcode
 import tools.outils as tool
-
+import PROG2pente.PenteZ as pente
 import copy
 
 class Morpion(Game):
@@ -77,39 +77,31 @@ class Morpion(Game):
         move, timer = cfg[0], cfg[1]
         #--première valeur est une string de la bonne longueur
         if type(move)!=str or len(move)!= nbl*nbc: 
-          print(1)
           return False
         #--la seconde valeur est un entier
         if type(timer)!=int: 
-          print(2)
           return False
         #--la chaîne ne contient que des valeurs dans self.PAWN
         for _ in move : 
             if _ not in self.PAWN : 
-              print(3)
               return False
         #----stone check
         nbX = move.count(self.PAWN[1]); nbO = move.count(self.PAWN[2]) #nombre X et O
         #--nombre de ’X’ et le nombre de ’O’ sont compatibles avec timer
         if nbO+nbX > timer: 
-          print(4)
           return False
         #--nombre de ’X’ est égal au nombre de ’O’ ou au nombre de ’O’+1
         if nbX not in (nbO, nbO+1): 
-          print(5)
           return False
         #----phase check
         #--si phase==0, timer n’excède pas le nombre de pierres
-        if phase == 0 and timer > pierres: 
-          print(6)
+        if phase == 0 and timer > pierres:
           return False
         #--si phase!=0, timer n’excède pas la limite du temps de jeu
         elif phase!=0 and timer > pierres+2*nbl: 
-          print(7)
           return False 
         #--
         if nbO+nbX < pierres and timer>nbO+nbX: 
-          print(8)
           return False
         #--teste tous les alignements
         nbalign=0 #compteur d'alignement
@@ -118,13 +110,19 @@ class Morpion(Game):
                         tool.columns,
                         lambda s, l, c: tool.diag_moins(s, l, c, self.get_parameter('tore')),
                         lambda s, l, c: tool.diag_plus(s, l, c, self.get_parameter('tore'))]:  
-          vectList = func(move, nbl, nbc)
-          print('vectList', vectList)
+          vectList = func(move, nbl, nbc) #stocke une liste
           for vect in vectList: #parcours des str de la liste
             if ligne*self.PAWN[1] in vect or ligne*self.PAWN[2] in vect: #'OOO' or 'XXX' for 3*3
               nbalign +=1 #nouvel alignement trouvé
-              print('nbalign', nbalign)
-          if nbalign > 1: return False
+          if nbalign > 1: 
+            return False
+          #-----cas du tore activé-----
+          if self.get_parameter('tore')==True:
+            for vect in vectList:
+              if vect.count(self.PAWN[0])==ligne : 
+                return False
+              if vect.count(self.PAWN[1])==ligne : 
+                return False
         #--tous les tests sont passés
         return True
     
@@ -147,11 +145,14 @@ class Morpion(Game):
         
     
 if __name__ == "__main__":
-    jeu=Morpion(phase=1)
-    _t = "XXXX.OOOO", 8 
-    jeu.valid_state( _t ) #True
-    print(jeu.valid_state( _t ) )
-    code = '''
+  pente.ConfigWin()
+  #jeu=Morpion(phase=1)
+  #_t = "XXXX.OOOO", 8
+  jeu=Morpion(taille =5,phase=1)
+  _t = "O.X.."*2+"X"+"."*4+"O.X.."*2, 9 
+  jeu.valid_state( _t ) #True
+  #print(jeu.valid_state( _t ) )
+  code = '''
 jeu = Morpion()
 jeu # test repr
 
@@ -191,4 +192,4 @@ jeu.valid_state( _v ) # False
 
 _v = "XOXOXXOO."+'.'*40, 8
 jeu.valid_state( _v ) # True
-''' ; testcode(code)
+''' ; #testcode(code)

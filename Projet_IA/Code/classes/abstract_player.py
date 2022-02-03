@@ -10,8 +10,8 @@ read-write 'who_am_i'
 an abstract 'decision' method to be redefined in subclasses
 a simple 'estimation' method that might be redefined in subclasses
 estimation is made wrt to the root player 
-> fine for minmax / alphabeta
-> to be signed for the negamax approach
+> root_estimation for minmax / alphabeta
+> turn_estimation for negamax approaches
 """
 
 from typing import Iterable
@@ -19,12 +19,15 @@ from typing import Iterable
 class Player:
     """ classe abstraite d'où dériveront tous les joueurs """
     ID = 0
+    WIN = 100
     def __init__(self, nom:str='default',
                  jeu:any=None, **kargs):
         """ nom: le nom du joueur pour l'affichage si on le souhaite
             jeu: le jeu auquel on veut faire joueur
-            kargs: un dictionnaire permettant de stocker ce qui sera utile
+            kargs: un dictionnaire permettant qui sera utile
         """
+
+        if (self.WIN <0): self.WIN = 100
         # on verifie que l'on a tout ce qui nous est nécessaire
         # pour travailler
         latt = "__str__ state turn opponent timer"
@@ -67,7 +70,7 @@ class Player:
         if v in (self.game.turn, self.game.opponent):
             self.__who = v
             
-    def get_value(self, key:any) -> any:
+    def get_value(self, key:str) -> any:
         """ return the value for a given key, None if key doesnt exist """
         return self.__local.get(key, None)
 
@@ -76,16 +79,14 @@ class Player:
         raise NotImplementedError("decision is undefined")
 
     def estimation(self):
-        """ a 4 states simple estimation for root's player
-        winner: +100
-        looser: -100
-        unknown: 0
-        draw: 25
+        """ a 3 states simple estimation for root's player
+        require WIN > 0
+        require WIN = - LOSS
+        ensure return is one of the 3 values
         """
-        if not self.game.over(): _e = 0 # unfinished
-        elif self.game.winner is None: _e = 25 # draw
-        elif self.game.winner == self.who_am_i: _e = 100 # win
-        else: _e = -100 # lost
+        if not self.game.over(): _e = 0
+        elif self.game.winner is None: _e = 0
+        elif self.game.winner == self.who_am_i: _e = self.WIN
+        else: _e = - self.WIN
         return _e
 
-    

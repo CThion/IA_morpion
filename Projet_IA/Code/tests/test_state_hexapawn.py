@@ -98,6 +98,12 @@ class TestCommon(unittest.TestCase):
         _2 = "O"*7
         self.assertFalse(self.o.valid_state((_1+_0+_2,0)),
                          "wrong content: expect False")
+        _1 = "X"+'1'*6
+        _0 = "0"*14
+        _2 = "2"*7
+        self.assertFalse(self.o.valid_state((_1+_0+_2,0)),
+                         "partially wrong content: expect False")
+        
     def test_good_str(self):
         """ good str content """
         self.assertTrue(hasattr(self.o, 'valid_state'),

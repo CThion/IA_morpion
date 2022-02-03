@@ -50,15 +50,28 @@ class Divide(Game):
     def state(self): return self.board, self.timer
     @state.setter
     def state(self, cfg:tuple):
-        if self.__valid(*cfg[0]):
+        if self.valid_state(cfg):
             self.__board = min(cfg[0]), max(cfg[0])
             self.timer = cfg[1]
-    def __valid(self, *cfg):
+
+    def __valid(self, *boxes) -> bool:
+        """ 2 boxes of non zero natural int """
+        return (len(boxes) == 2 and
+                boxes[0] > 0 and
+                boxes[1] > 0 and
+                all([isinstance(x, int) for x in boxes]))
+        
+    def valid_state(self, cfg:tuple):
         """ is this configuration fine """
-        if len(cfg) != 2: return False
-        if cfg[0] <= 0 or cfg[1] <= 0: return False
-        if any([not isinstance(x, int) for x in cfg]): return False
-        return True
+        _boxes, _timer = cfg
+        if not self.__valid(*_boxes): return False
+        # boxes content is bounded
+        if _timer == 0: return tuple(_boxes) == tuple(self.__init_board)
+        if _timer == 1:
+            a,b = self.__init_board
+            return sum(_boxes) == a or sum(_boxes) == b
+        return sum(_boxes) <= self.__init_board[1] - _timer
+
     @property
     def actions(self) -> tuple:
         """ which box to remove, how many in 1st box """
@@ -121,5 +134,18 @@ jeu.hash_code
 
 jeu.actions
 jeu.move(jeu.actions[3])
+jeu.move(jeu.actions[-1])
 print(jeu)
+
+jeu.undo()
+print(jeu)
+
+jeu.valid_state( ((3,7), 4) )# True
+jeu.valid_state( ( (2,1), 1) )# False
+jeu.valid_state( ( (1,2), 1) )# False
+jeu.valid_state( ( (3,4), 1) )# True
+jeu.valid_state( ( (13,4), 1) )# True
+jeu.valid_state( ( (2,1), 2) )# True
+jeu.valid_state( ( (1,2), 2) )# True
+jeu.valid_state( ( (13,4), 2) )# False
 ''' ; testcode(code)

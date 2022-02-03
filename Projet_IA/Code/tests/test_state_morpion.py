@@ -98,6 +98,10 @@ class TestCommon(unittest.TestCase):
 
         self.assertFalse(self.o.valid_state((_0,0)),
                          "wrong content: expect False")
+        _0 = "."+"0"*48
+        self.assertFalse(self.o.valid_state((_0,0)),
+                         "partially wrong content: expect False")
+        
     def test_good_str(self):
         """ good str content """
         self.assertTrue(hasattr(self.o, 'valid_state'),
@@ -143,7 +147,26 @@ class TestSpecific(unittest.TestCase):
         for _ in range(x): _s[_p[_]] = ch[1]
         for _ in range(y): _s[_p[x+_]] = ch[-1]
         return ''.join(_s), x+y
-        
+
+    def make_nowin(self, alphabet:str, nl:int) -> tuple:
+        """ build neutral full board of nl rows """
+        _ = {3:  [1, 2, 1,
+                  2, 1, 0,
+                  2, 1, 2,],
+             5:  [1, 2, 1, 2, 1,
+                  2, 1, 2, 1, 2,
+                  2, 1, 2, 1, 2,
+                  1, 2, 1, 2, 1,
+                  1, 1, 2, 2, 0,],
+             7: [1,2,1,2,1,2,1,
+                 1,2,1,2,1,2,1,
+                 2,1,2,1,2,1,2,
+                 2,1,2,1,2,1,2,
+                 2,1,2,1,2,1,2,
+                 1,2,1,2,1,2,1,
+                 0,1,2,1,2,1,2],}
+        return ''.join([alphabet[x] for x in _[nl]]), (nl*nl -1)
+    
     @patch('builtins.print')
     def test_bad_pawns(self, mock_prn):
         """ check that J1 and J2 played when needed """
@@ -181,7 +204,7 @@ class TestSpecific(unittest.TestCase):
             _p = random.choice( (1,2) )
             self.o = self.K(k, phase=_p)
             _0 = self.o.get_parameter('pierres') // 2
-            _s, v = self.make_state(self.K.PAWN, _0, _0, k*k)
+            _s, v = self.make_nowin(self.K.PAWN, k)
             for i in range(1, k):
                 with self.subTest(size=k, count=v+i):
                     self.assertFalse(self.o.valid_state( (_s, v+2*k+i) ),
@@ -194,7 +217,7 @@ class TestSpecific(unittest.TestCase):
             _p = random.choice( (1,2) )
             self.o = self.K(k, phase=_p)
             _0 = self.o.get_parameter('pierres') // 2
-            _s, v = self.make_state(self.K.PAWN, _0, _0, k*k)
+            _s, v = self.make_nowin(self.K.PAWN, k)
             for i in range(k):
                 with self.subTest(size=k, count=v+i):
                     self.assertTrue(self.o.valid_state( (_s, v+2*k-i) ),
@@ -225,12 +248,77 @@ class TestBonus33(unittest.TestCase):
         self.assertFalse(self.o.valid_state(_s),
                          "2 winners in col: cant be")
 
+class TestBonus55(unittest.TestCase):
+    """
+       detection des cas multi-gains en 5x5
+    """
+    def setUp(self):
+        chk.check_class(tp, THAT)
+        self.K = getattr(tp, THAT)
+        self.K.PAWN = '.XO'
+        self.o = self.K(5)
 
+    @patch('builtins.print')
+    def test_bad_row_classic(self, mock_prn):
+        """ 2 different winners in rows """
+        _s = "OOOO."+"."*15+".XXXX", 8
+        self.assertFalse(self.o.valid_state(_s),
+                         "2 winners in row: cant be")
+
+    #@patch('builtins.print')
+    def test_bad_same_win(self):#, mock_prn):
+        """ same winner 2 rows or cols tore or not """
+        _s = "XXOXX"+"O.O.O"+"XXXX."+"."*5+"O.O.O", 15
+
+        self.assertTrue(self.o.valid_state(_s),
+                         "1 winner in row: ok")
+        _1 = self.K(5, True)
+        self.assertFalse(_1.valid_state(_s),
+                         "2 wins in row: cant be")
+        
+        _s = "XO..O"+"X.X.."+"OOX.O"+"X.X.."+"XOX.O", 15
+
+        self.assertTrue(self.o.valid_state(_s),
+                         "1 winner in col: ok")
+        self.assertFalse(_1.valid_state(_s),
+                         "2 wins in col: cant be")
+        
+    @patch('builtins.print')
+    def test_bad_row_tore(self, mock_prn):
+        """ 2 different winners in rows """
+        _s = "OOXOO" + "..X.." + "."*10 + "XXXOX", 11
+        _1 = self.K(5, tore=True)
+        self.assertFalse(_1.valid_state(_s),
+                         "2 winners in row: cant be")
+    @patch('builtins.print')
+    def test_bad_col_classic(self, mock_prn):
+        """ 2 different winners in columns """
+        _s = "OX..."*4+"."*5, 8
+
+        self.assertFalse(self.o.valid_state(_s),
+                         "2 winners in col: cant be")
+        
+    @patch('builtins.print')
+    def test_bad_col_tore(self, mock_prn):
+        """ 2 different winners in columns """
+        _s = "O.X.."*2+"X"+"."*4+"O.X.."*2, 9
+        _1 = self.K(5, tore=True)
+        self.assertFalse(_1.valid_state(_s),
+                         "2 winners in col: cant be")
+        
+    @patch('builtins.print')
+    def test_bad_win(self, mock_prn):
+        """ 2 different winners in columns and diag """
+        _s = "XOXXO.OX...X...OOX...O..X", 13
+        _1 = self.K(5, tore=True)
+        self.assertFalse(_1.valid_state(_s),
+                         "2 winners O in col, X in diag: cant be")
+        
 def suite(fname):
     """ permet de récupérer les tests à passer avec l'import dynamique """
     global tp
     klasses = (TestDefault, TestBasicSetup, TestCommon, TestSpecific,
-               TestBonus33)
+               TestBonus33, TestBonus55)
     
     try:
         tp = __import__(fname)

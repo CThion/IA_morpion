@@ -30,42 +30,56 @@ class Matches(Game):
         super().reset()
         self.__board = self.__init_board[:]
 
+    def valid_state(self, cfg:tuple) -> bool:
+        """ on peut enlever de 1 à 3 allumettes """
+        _matches, _timer = cfg
+        _max = self.__init_board[0]
+        return _max - _timer >=  _matches >= _max - 3*_timer
+    
     @property
     def board(self): return tuple(self.__board)
+
     @property
     def state(self): return self.board[0], self.timer
     @state.setter
     def state(self, cfg:tuple):
-        self.__board = cfg[0], self.__board[1]
-        self.timer = cfg[1]
+        if self.valid_state(cfg):
+            self.__board = cfg[0], self.__board[1]
+            self.timer = cfg[1]
+
     @property
     def actions(self) -> tuple:
         """ Choose the numer of matches """
         if self.over(): return ()
         return tuple(list(range(1, min(3, self.__board[0])+1)))
+
     @property
     def winner(self):
         """ defines the winner """
         if self.over():
             return self.turn if self.board[1] else self.opponent
         return None
+
     def over(self) -> bool:
         """ no move """
         return self.board[0] == 0
+
     def win(self) -> bool:
         """ no move available """
         return self.over()
+
     def move(self, action):
         if action in self.actions:
             _old, _rule = self.__board
             self.add_history(self.state)
             self.__board = _old - action, _rule
             self.timer += 1
+
     def undo(self):
         _ = self.pop_history()
         if _ is not None:
             self.state = _
-
+            
     def __str__(self):
         """ Modification de l'affichage par défaut """
         _msg = """
@@ -88,7 +102,7 @@ Pour gagner vous {} prendre la dernière allumette\n
 if __name__ == "__main__":
     code = '''
 jeu = Matches(13)
-jeu
+jeu.state
 print(jeu)
 
 jeu.move(3)
@@ -99,4 +113,7 @@ print(jeu)
 
 jeu.undo()
 print(jeu)
+
+_s = 11, 4
+jeu.valid_state(_s) # False
 ''' ; testcode(code)

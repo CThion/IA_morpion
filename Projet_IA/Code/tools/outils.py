@@ -10,7 +10,7 @@ except:
         from tools.ezCLI import testcode
     except:
         print("missing ezCLI and tools.ezCLI")
-        
+
 
 def count(func):
     """ count the recursive calls """
@@ -30,6 +30,7 @@ def c2p(coord:Sized, nc:int) -> int:
     """ provides a 1D value from a 2D value """
     return coord[0]*nc+coord[1]
 
+    
 #======================== chaine ==============================#
 #================ usefull for morpion and alike ===============#
 #==============================================================#
@@ -58,6 +59,31 @@ def diag_moins(state:str, nbl:int, nbc:int, tore:bool) -> list:
                       for j in range(nbc)
                       if ((i-j)%nbc == k if tore else (i-j) == k)])
              for k in range(nbc) ]
+
+def longuest_chain(string:str, tore:bool, pawn:str) -> list:
+    """ return list of contiguous positions """
+    _sz1 = len(string)
+    _ = [i for i in range(_sz1) if string[i] == pawn]
+    _sz = len(_)
+    _bag = []
+    for p,x in enumerate(_):
+        j = 1 ; _ok = True
+        while j < _sz and _ok:
+            if tore :
+                if (_[(p+j)%_sz] != (x+j)%_sz1):
+                    _ok = False
+                else:
+                    j += 1
+            elif p+j < _sz:
+                if (_[p+j] != x+j):
+                    _ok = False
+                else:
+                    j += 1
+            else:
+                _ok = False
+                
+        _bag.append(_sz if _ok else j)
+    return _bag
 
 def test_dim():
     code = '''
@@ -110,7 +136,17 @@ diag_moins(_t, 7, 7, True)
 diag_moins(_s, 7, 7, False)
 diag_moins(_s, 7, 7, True)
 ''' ; testcode(code)
-    
+
+def test_chain():
+    code = '''
+s = "OOXOO"
+longuest_chain(s, False, 'O')
+longuest_chain(s, True, 'O')
+
+t = "XXXOX"
+longuest_chain(t, False, 'X')
+longuest_chain(t, True, 'X')
+''' ; testcode(code)
+
 if __name__ == '__main__':
-    test_dim()
-    test_str()
+    test_chain()
