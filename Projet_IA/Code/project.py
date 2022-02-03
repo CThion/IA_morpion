@@ -72,6 +72,7 @@ class Morpion(Game):
         pierres = self.get_parameter('pierres')
         phase = self.get_parameter('phase')
         ligne = self.get_parameter('ligne')
+        pawn=self.PAWN
         #--le tuple est de taille 2
         if len(cfg)!=2: return False
         move, timer = cfg[0], cfg[1]
@@ -81,12 +82,12 @@ class Morpion(Game):
         #--la seconde valeur est un entier
         if type(timer)!=int: 
           return False
-        #--la chaîne ne contient que des valeurs dans self.PAWN
+        #--la chaîne ne contient que des valeurs dans pawn
         for _ in move : 
-            if _ not in self.PAWN : 
+            if _ not in pawn : 
               return False
         #----stone check
-        nbX = move.count(self.PAWN[1]); nbO = move.count(self.PAWN[2]) #nombre X et O
+        nbX = move.count(pawn[1]); nbO = move.count(pawn[2]) #nombre X et O
         #--nombre de ’X’ et le nombre de ’O’ sont compatibles avec timer
         if nbO+nbX > timer: 
           return False
@@ -107,22 +108,20 @@ class Morpion(Game):
         nbalign=0 #compteur d'alignement
         #parcours des liste de str d'orientation
         for func in [tool.lines,
-                        tool.columns,
-                        lambda s, l, c: tool.diag_moins(s, l, c, self.get_parameter('tore')),
-                        lambda s, l, c: tool.diag_plus(s, l, c, self.get_parameter('tore'))]:  
+                    tool.columns,
+                    lambda s, l, c: tool.diag_moins(s, l, c, self.get_parameter('tore')),
+                    lambda s, l, c: tool.diag_plus(s, l, c, self.get_parameter('tore'))]:  
           vectList = func(move, nbl, nbc) #stocke une liste
           for vect in vectList: #parcours des str de la liste
-            if ligne*self.PAWN[1] in vect or ligne*self.PAWN[2] in vect: #'OOO' or 'XXX' for 3*3
+            if ligne*pawn[1] in vect or ligne*pawn[2] in vect: #'OOO' or 'XXX' for 3*3
               nbalign +=1 #nouvel alignement trouvé
+            #--Tore
+            if self.get_parameter('tore')==True:
+              if vect.count(pawn[0])==ligne or vect.count(pawn[1])==ligne: 
+                return False
+          #--verif nombre alignement ≤ 1
           if nbalign > 1: 
             return False
-          #-----cas du tore activé-----
-          if self.get_parameter('tore')==True:
-            for vect in vectList:
-              if vect.count(self.PAWN[0])==ligne : 
-                return False
-              if vect.count(self.PAWN[1])==ligne : 
-                return False
         #--tous les tests sont passés
         return True
     

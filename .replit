@@ -1,4 +1,4 @@
 language = "python3"
-run = "python Projet_IA/Code/project.py"
+run = "python Projet_IA/Code/main_tests.py"
 #python Projet_IA/Code/tools/outils.py
 #python Projet_IA/Code/main_tests.py
