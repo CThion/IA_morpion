@@ -5,7 +5,10 @@
 from classes.abstract_player import Player
 from tools.ezCLI import testcode
 import random
-
+#########################################################################
+#---------CLEMENT LIT CE MESSAGE------------------
+#ON PEUT FAIRE DES TESTS VIA MAIN_TEST.PY
+#########################################################################
 #=========== les classes à mettre en oeuvre pour le jalon 02 ===========#
 class Human(Player):
   """
@@ -20,8 +23,14 @@ class Human(Player):
       print("not my turn to play")
       return None
     # maintenant on peut travailler
-    print(ezCLI.grid(game.state,size))
-    return input('Où voulez-vous jouer ?')
+    print(self.game) #Affichage de la partie avec les règles
+    print("Plateau de jeu: ",self.game.board)
+    print("Actions possibles: ", self.game.actions)
+    choice = input('Où voulez-vous jouer ?') 
+
+    while choice not in self.game.actions:  #Tant que l'input n'est pas valide
+      a = input('Mauvais choix, réessayez. Où voulez-vous jouer ?') 
+    return a
 
 
 # -----------------------------------------------------------------------
@@ -35,8 +44,8 @@ class Randy(Player):
       print("not my turn to play")
       return None
     # maintenant on peut travailler
-    c = randrange(len(game.state))
-    return game.state[c]
+    c = randrange(len(self.game.actions))
+    return self.game.actions[c]
 
 # -----------------------------------------------------------------------
 class MinMax(Player): #récursif
@@ -53,8 +62,8 @@ class MinMax(Player): #récursif
     # maintenant on peut travailler
     self.state = state  #etat de la partie : à regarder pour savoir où jouer
     self.force = 0
-    super().__init__(nom=nom,jeu=jeu,profondeur)
-    self.profondeur = profondeur
+    #super().__init__(nom=nom,jeu=jeu,profondeur)
+    #self.profondeur = profondeur
   # -----------------------------------------------
   def __min():
     for i in range(self.profondeur):
@@ -102,7 +111,6 @@ class AlphaBetaNegaMax(Player): #optionnel 2
 
 
 #====================== exemples de code test ==========================#
-from tools.ezCLI import grid
 from random import randrange
 
 def test_decision(joueur):
