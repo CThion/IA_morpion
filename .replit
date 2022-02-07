@@ -1,4 +1,5 @@
 language = "python3"
-run = "python Projet_IA/Code/main_tests.py"
-#python Projet_IA/Code/tools/outils.py
-#python Projet_IA/Code/main_tests.py
+run = "Projet_IA/Code/tests/test_human.py"
+#run = "python Projet_IA/Code/tests/test_state_morpion.py"
+#run = python Projet_IA/Code/tools/outils.py
+#run = python Projet_IA/Code/main_tests.py
