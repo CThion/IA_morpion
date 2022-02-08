@@ -63,22 +63,35 @@ class MinMax(Player): #récursif
       print("not my turn to play")
       return None
     # maintenant on peut travailler
-    self.state = state  #etat de la partie : à regarder pour savoir où jouer
-    self.force = 0
-    #super().__init__(nom=nom,jeu=jeu,profondeur)
-    #self.profondeur = profondeur
+    super().__init__(nom:str='default',jeu:any=None,pf:int)
+    
   # -----------------------------------------------
-  def __min():
-    for i in range(self.profondeur):
-      pass
-    pass
+  def __choix(self):
+    for a_i in self.game.actions:
+      #calculer s_i le nouvel etat construit par (s,a_i)
+      v_i = eval_min(s_i,pf-1)
+    #return a_j tel que v_j = max(v_1, .. v_k) et j minimum 
   # -----------------------------------------------
-  def __max():
-    pass
+  def __eval_min(self,s,pf):
+    """Cherche à minimiser les gains adverses"""
+    if pf == 0 : return s
+    else:
+      for k in range(liste):  #Manque à définir liste, cad les s_k construits par (s, a_j)
+        k = eval_max(s,pf-1)
+        liste.append(k)
+      return min(liste)
+  # -----------------------------------------------
+  def __eval_max(self,pf):
+    if pf == 0 : return s
+    else:
+      for k in range(liste):  #Manque à définir liste, cad les s_k construits par (s, a_j)
+        k = eval_min(s,pf-1)
+        liste.append(k)
+      return max(liste)
 # -----------------------------------------------------------------------
 class AlphaBeta(Player):
   """
-  
+  Docstring à rajouter
   """
   def decision(self, state):
     self.game.state = state # on met à jour l’état du jeu
@@ -90,7 +103,7 @@ class AlphaBeta(Player):
 # -----------------------------------------------------------------------
 class NegaMax(Player):  #optionnel 1
   """
-  
+  Docstring à rajouter
   """
   def decision(self, state):
     self.game.state = state # on met à jour l’état du jeu
@@ -102,7 +115,7 @@ class NegaMax(Player):  #optionnel 1
   # -----------------------------------------------------------------------
 class AlphaBetaNegaMax(Player): #optionnel 2
   """
-  
+  Docstring à rajouter
   """
   def decision(self, state):
     self.game.state = state # on met à jour l’état du jeu
