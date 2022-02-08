@@ -26,11 +26,14 @@ class Human(Player):
     print(self.game) #Affichage de la partie avec les règles
     print("Plateau de jeu: ",self.game.board)
     print("Actions possibles: ", self.game.actions)
-    choice = input('Où voulez-vous jouer ?') 
+    choice = input("Où voulez-vous jouer ? Choisissez '1','2' ou '3'")
+    if choice == 1 or choice =='1': choice = self.game.actions[0]
+    if choice == 2 or choice =='2': choice = self.game.actions[1]
+    if choice == 3 or choice =='3': choice = self.game.actions[2]
 
     while choice not in self.game.actions:  #Tant que l'input n'est pas valide
-      a = input('Mauvais choix, réessayez. Où voulez-vous jouer ?') 
-    return a
+      choice = input('Mauvais choix, réessayez. Où voulez-vous jouer ?') 
+    return choice
 
 
 # -----------------------------------------------------------------------
