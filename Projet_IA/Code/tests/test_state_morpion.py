@@ -313,12 +313,120 @@ class TestBonus55(unittest.TestCase):
         _1 = self.K(5, tore=True)
         self.assertFalse(_1.valid_state(_s),
                          "2 winners O in col, X in diag: cant be")
+
+class TestMultiWin5x5(unittest.TestCase):
+    def setUp(self):
+        chk.check_class(tp, THAT)
+        self.K = getattr(tp, THAT)
+        self.K.PAWN = '.XO'
         
+    @patch('builtins.print')
+    def test_bad_win_classic(self, mock_prn):
+        """ 3 wins cant be if no intersection in plane """
+        self.o = self.K(5)
+        _0 = "OXO.X"+".XXXX"+"OXXOO"+"OX.OO"+"..O.."
+        _1 = [p for p in range(25) if _0[p] == "O"]
+        self.assertFalse(self.o.valid_state( (_0, 18) ),
+                         "Expect False")
+        for x in _1:
+            _2 = _0[:x]+'.'+_0[x+1:]
+            with self.subTest(grid=_2):
+                self.assertFalse(self.o.valid_state( (_2, 17) ),
+                                "Expect False")
+        
+    @patch('builtins.print')
+    def test_bad_win_tore(self, mock_prn):
+        """ 3 wins cant be if no intersection in tore """        
+        self.o = self.K(5, tore=True)
+        _0 = "OO.XO"+"XXXXO"+".XO.O"+"XXO.."+".XO.."
+        _1 = [p for p in range(25) if _0[p] == "."]
+        self.assertFalse(self.o.valid_state( (_0, 17) ),
+                         "Expect False")
+        for x in _1:
+            _2 = _0[:x]+'O'+_0[x+1:]
+            with self.subTest(grid=_2):
+                self.assertFalse(self.o.valid_state( (_2, 18) ),
+                                 "Expect False")
+
+    
+    @patch('builtins.print')
+    def test_good_win(self, mock_prn):
+        """ 3 wins can be """
+        _0 = "O.OXO"+"XXXXO"+".XXOO"+"XOX.."+"OOXO."
+        _1 = [p for p in range(25) if _0[p] == "O"]
+        self.o = self.K(5)
+        self.assertTrue(self.o.valid_state( (_0, 20) ),
+                         "Expect True")
+        for x in _1:
+            _2 = _0[:x]+'.'+_0[x+1:]
+            with self.subTest(grid=_2):
+                self.assertTrue(self.o.valid_state( (_2, 19) ),
+                                 "Expect True")
+        
+    @patch('builtins.print')
+    def test_bwt_gwc(self, mock_prn):
+        """ tore has more failures than classic """
+        self.o = self.K(5)
+        _0 = "OXO.X"+"XX.XX"+"O.XOO"+"OX.OO"+".XO.."
+        _1 = [p for p in range(25) if _0[p] == "O"]
+        self.assertTrue(self.o.valid_state( (_0, 18) ),
+                         "Expect True")
+        for x in _1:
+            _2 = _0[:x]+'.'+_0[x+1:]
+            with self.subTest(grid=_2):
+                self.assertTrue(self.o.valid_state( (_2, 17) ),
+                                 "Expect True")
+
+                
+        self.o = self.K(5, tore=True)
+        _0 = "OXO.X"+"XX.XX"+"O.XOO"+"OX.OO"+".XO.."
+        _1 = [p for p in range(25) if _0[p] == "O"]
+        self.assertFalse(self.o.valid_state( (_0, 18) ),
+                         "Expect False")
+        for x in _1:
+            _2 = _0[:x]+'.'+_0[x+1:]
+            with self.subTest(grid=_2):
+                self.assertFalse(self.o.valid_state( (_2, 17) ),
+                                 "Expect False")
+
+class TestMultiWin7x7(unittest.TestCase):
+    def setUp(self):
+        chk.check_class(tp, THAT)
+        self.K = getattr(tp, THAT)
+        self.K.PAWN = '.XO'
+
+    @patch('builtins.print')
+    def test_bad_win_classic(self, mock_prn):
+        """ 3 wins cant be if no intersection in plane """
+        self.o = self.K(7)
+        _0 = "OXO.XO.XXXXXO.OXXOOO..X.OO..XX.O....O"+"."*12
+        _1 = [p for p in range(49) if _0[p] == "O"]
+        self.assertFalse(self.o.valid_state( (_0, 24) ),
+                         "Expect False")
+        for x in _1:
+            _2 = _0[:x]+'.'+_0[x+1:]
+            with self.subTest(grid=_2):
+                self.assertFalse(self.o.valid_state( (_2, 23) ),
+                                 "Expect False")
+    @patch('builtins.print')
+    def test_bad_win_tore(self, mock_prn):
+        """ 3 wins cant be if no intersection in tore """        
+        self.o = self.K(7, tore=True)
+        _0 = "OX....XXXOOXXXOX..X..OOO.OO.O......OX...O.XX....."
+        _1 = [p for p in range(49) if _0[p] == "O"]
+        self.assertFalse(self.o.valid_state( (_0, 24) ),
+                         "Expect False")
+        for x in _1:
+            _2 = _0[:x]+'.'+_0[x+1:]
+            with self.subTest(grid=_2):
+                self.assertFalse(self.o.valid_state( (_2, 23) ),
+                                 "Expect False")
+                
 def suite(fname):
     """ permet de récupérer les tests à passer avec l'import dynamique """
     global tp
     klasses = (TestDefault, TestBasicSetup, TestCommon, TestSpecific,
-               TestBonus33, TestBonus55)
+               TestBonus33, TestBonus55, TestMultiWin5x5, TestMultiWin7x7)
     
     try:
         tp = __import__(fname)

@@ -57,7 +57,7 @@ class Matches(Game):
     def winner(self):
         """ defines the winner """
         if self.over():
-            return self.turn if self.board[1] else self.opponent
+            return self.turn if not self.board[1] else self.opponent
         return None
 
     def over(self) -> bool:
@@ -86,12 +86,16 @@ class Matches(Game):
 Il y a {:02} allumettes. Retirez de 1 à 3 allumettes.
 Pour gagner vous {} prendre la dernière allumette\n
 """.format(self.board[0],
-           "ne devez pas" if self.board[1] else "devez")
+           "devez" if self.board[1] else "ne devez pas")
         return _msg + self.show_msg()
     
     def show_msg(self):
-        return ("Coup(s) joué(s) = {}, trait au joueur {}\n"
+        _msg = ("Coup(s) joué(s) = {}, trait au joueur {}\n"
                 "".format(self.timer, self.turn+1))
+        if self.win():
+            _msg += ("Partie terminée, gagnant '{}'\n"
+                     .format(self.winner+1))
+        return _msg
 
     @property
     def hash_code(self):

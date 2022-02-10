@@ -124,7 +124,7 @@ if __name__ == '__main__':
     _submenu = { '1': ("hexapawn morpion",
                        [test_state_hexapawn, test_state_morpion]),
                  '2': ("randy human minmax negamax alphabeta alphabeta_negamax",
-                       [test_randy, test_human]),
+                       [test_randy, test_human, test_minmax]),
                        #[test_randy, test_human, test_minmax,
                        # test_negamax, test_alphabeta, test_negalpha]),
                  '3':("alphabeta_memory iterative_deepening randy_mc ucb uct"

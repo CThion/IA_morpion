@@ -4,10 +4,10 @@
 from typing import Sized
 import functools
 try:
-    from ezCLI import testcode
+    from ezCLI import testcode, grid
 except:
     try:
-        from tools.ezCLI import testcode
+        from tools.ezCLI import testcode, grid
     except:
         print("missing ezCLI and tools.ezCLI")
 
@@ -60,6 +60,31 @@ def diag_moins(state:str, nbl:int, nbc:int, tore:bool) -> list:
                       if ((i-j)%nbc == k if tore else (i-j) == k)])
              for k in range(nbc) ]
 
+def get_index(i:int, j:int, nbl:int, nbc:int, tore:bool) -> list:
+    """ given i: type (line, column, diag+, diag-
+        given j: the position
+        return the index involved
+    """
+    if i == 0: # line
+        return [k for k in range(j*nbc, (j+1)*nbc)]
+    if i == 1: # column
+        return [k for k in range(j,nbl*nbc,nbc)]
+    if i == 2: # diag_plus
+        return [a*nbc+b for a in range(nbl) for b in range(nbc)
+                if ((a+b)%nbc == j if tore else (a+b) == j)]
+    return [a*nbc+b for a in range(nbl) for b in range(nbc)
+                if ((a-b)%nbc == j if tore else (a-b) == j)]
+
+def intersection(state:str, pawn:str, candidates:list,
+                 nbl:int, nbc:int, tore:bool) -> set:
+    """ check that there is one common point """
+    _ = [set() for x in candidates]
+    for a,(i,j) in enumerate(candidates):
+        substring = get_index(i, j, nbl, nbc, tore)
+        for p in substring:
+                if state[p] == pawn: _[a].add(p)
+    return set.intersection(*_)
+
 def longuest_chain(string:str, tore:bool, pawn:str) -> list:
     """ return list of contiguous positions """
     _sz1 = len(string)
@@ -82,8 +107,21 @@ def longuest_chain(string:str, tore:bool, pawn:str) -> list:
             else:
                 _ok = False
                 
-        _bag.append(_sz if _ok else j)
+        _bag.append( j)
     return _bag
+
+
+def display_grid(state:str, pawns:str, nbl:int):
+    """ basic display from a string, usefull for debug """
+    board = [ [pawns[0] for _ in range(nbl)] for _ in range(nbl) ]
+    count = [0,0,0]
+    for i,x in enumerate(state):
+        a,b = p2c(i, nbl)
+        j = pawns.index(x)
+        count[j] += 1
+        board[a][b] = x
+    print(grid(board, size=3))
+    print("count {}".format(count))
 
 def test_dim():
     code = '''

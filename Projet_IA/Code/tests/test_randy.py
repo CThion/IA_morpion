@@ -5,12 +5,14 @@
 __author__ = "mmc <marc-michel dot corsini at u-bordeaux dot fr>"
 __date__ = "19.02.21"
 __usage__ = "Project 2022: tests jalon 02: Randy"
+__update__ = "04.02.22"
 
 import os
 import unittest
 from unittest.mock import patch
 from  tools import checkTools as chk
 from allumettes import Matches as A
+from divide_left import Divide as B
 
 THAT="Randy"
 
@@ -89,7 +91,7 @@ class TestDefault(unittest.TestCase):
         self.assertIsNone(self.o.decision(self.jeu.state),
                           "wrong answer, should be None")
 
-class TestBehavior(unittest.TestCase):
+class TestBehaviorA(unittest.TestCase):
     """ check the correct default behavior of 'THAT' """
     def setUp(self):
         chk.check_class(tp, THAT)
@@ -97,23 +99,42 @@ class TestBehavior(unittest.TestCase):
         self.K = getattr(tp, THAT)
         self.o = self.K('x', self.jeu)
 
-    @patch('builtins.print')
-    def test_decision_output(self, mock_prn):
+    def test_decision_output(self):
         """ given an answer is it ok """
         self.assertIsNone(self.o.who_am_i, "wrong player should be None")
         self.o.who_am_i = self.jeu.turn
         _0 = 10, 2
         _1 = self.o.decision( _0 )
-        self.assertTrue(_1 in (1, 2, 3),
-                        "expect a valid action: got {}".format(_1))
         self.assertEqual(self.jeu.state, _0,
                          "expect a valid state")
+        self.assertTrue(_1 in self.jeu.actions,
+                        "expect a valid action: got {}".format(_1))
+
+class TestBehaviorB(unittest.TestCase):
+    """ check the correct default behavior of 'THAT' """
+    def setUp(self):
+        chk.check_class(tp, THAT)
+        self.jeu = B(7, 17)
+        self.K = getattr(tp, THAT)
+        self.o = self.K('x', self.jeu)
+
+    def test_decision_output(self):
+        """ given an answer is it ok """
+        self.assertIsNone(self.o.who_am_i, "wrong player should be None")
+        self.o.who_am_i = self.jeu.turn
+        _0 = (5, 7), 2
+        _1 = self.o.decision( _0 )
+        self.assertEqual(self.jeu.state, _0,
+                         "expect a valid state")
+        self.assertTrue(_1 in self.jeu.actions,
+                        "expect a valid action: got {}".format(_1))
         
         
 def suite(fname):
     """ permet de récupérer les tests à passer avec l'import dynamique """
     global tp
-    klasses = (TestPrivacy, TestKlass, TestDefault, TestBehavior)
+    klasses = (TestPrivacy, TestKlass, TestDefault,
+               TestBehaviorA, TestBehaviorB)
     
     try:
         tp = __import__(fname)

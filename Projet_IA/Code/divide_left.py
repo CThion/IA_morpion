@@ -120,6 +120,14 @@ Le perdant est celui qui ne peut pas respecter les règles
 
 """
         return _msg+super().__str__()
+
+    def show_msg(self):
+        _msg = ("Coup(s) joué(s) = {}, trait au joueur {}\n"
+                "".format(self.timer, self.turn+1))
+        if self.win():
+            _msg += ("Partie terminée, gagnant '{}'\n"
+                     .format(self.winner+1))
+        return _msg
     
     @property
     def hash_code(self):

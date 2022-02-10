@@ -17,42 +17,70 @@ jeu = Matches(13, True) # le but prendre la dernière allumette
 print(jeu) # on attend 13 allumettes
 
 moi = joueur('toto', jeu, pf=3)
-moi.decision( (3, 4) ) # on attend None
-print(jeu) # on attend 3 allumettes
+moi.decision( (3, 4) ) is None # on attend True au test
+jeu.state == (3,4) # on attend True
 
 moi.who_am_i = jeu.turn # moi est le premier joueur
-moi.decision( (7, 3) ) # on attend None
-print(jeu) # on attend 7 allumettes
+moi.decision( (7, 3) ) is None # on attend True au test
+jeu.state == (7,3) # on attend 7 allumettes
 
-moi.decision( (7, 4) ) # on attend 1, 2 ou 3 pour Human et Randy
-print(jeu) # on attend 7 allumettes
+moi.decision( (7, 4) ) in (1, 2, 3) # on attend True au test
+jeu.state == (7, 4)  # on attend True au test
+
+from divide_left import Divide
+jeu = Divide(7, 17) # le but partager les jetons en 2
+print(jeu)
+
+moi = joueur('boxer', jeu, pf=3)
+moi.decision( ((3, 4), 1) ) is None # on attend True au test
+jeu.state == ((3,4), 1) # on attend True
+
+moi.who_am_i = jeu.turn # moi est le premier joueur
+moi.decision( ((7, 3), 4) ) is None # on attend True au test
+jeu.state == ((3,7), 4) # on attend True
+
+moi.decision( ((7, 4), 3)) in (('A',1),('A',2),('A',3),('B',1),('B',2)) # on attend True au test
+jeu.state == ((4, 7), 3)  # on attend True au test
 ''' ; testcode(code)
 
 def test_clever(joueur):
     """ on attend que joueur soit MinMax Negamax AlphaBeta Neg_AlphaBeta """
     code = '''
 from allumettes import Matches
-jeu = Matches(13, False) # le but prendre la dernière allumette
-print(jeu) # on attend 13 allumettes
+jeu = Matches(13, True) # le but prendre la dernière allumette
+jeu.state == (13, 0) # on attend True au test
 
 moi = joueur('toto', jeu, pf=3)
 moi.who_am_i = jeu.turn # moi est le premier joueur
-moi.decision( (3, 4) ) # on attend 3
-print(jeu) # on doit voir 3 allumettes
+moi.decision( (3, 4) ) == 3 # on attend True au test
+jeu.state == (3, 4) # on attend True au test
 
-moi.decision( (5, 4) ) # on attend 1
-print(jeu) # on doit voir 5 allumettes
+moi.decision( (5, 4) ) == 1 # on attend True au test
+jeu.state == (5, 4) # on attend True au test
 
-jeu2 = Matches(13, True) # le but ne pas prendre la dernière allumette
+moi.decision( (6, 4) ) == 2 # on attend True au test
+jeu.state == (6, 4) # on attend True au test
+
+jeu2 = Matches(13, False) # le but ne pas prendre la dernière allumette
 moi = joueur('toto', jeu2, pf=3)
 moi.who_am_i = jeu2.turn # moi est le premier joueur
-moi.decision( (3, 4) ) # on attend 2
-print(jeu2) # on doit voir 3 allumettes
+moi.decision( (3, 4) ) == 2# on attend True au test
+jeu2.state == (3, 4)  # on attend True au test
 
-moi.decision( (4, 4) ) # on attend 3
-print(jeu2) # on doit voir 4 allumettes
+moi.decision( (4, 4) ) == 3 # on attend True au test
+jeu2.state == (4, 4) # on attend True au test
 
-moi.decision( (5, 4) ) # on attend 1
-print(jeu2) # on doit voir 5 allumettes
+moi.decision( (5, 4) ) == 1 # on attend True au test
+jeu2.state == (5, 4) # on attend True au test
+
+moi.decision( (6, 4) ) == 1 # on attend True au test
+jeu2.state == (6, 4) # on attend True au test
+
+from divide_left import Divide
+jeu3 = Divide(7, 17)
+moi = joueur('malin', jeu3, pf=3)
+moi.who_am_i = jeu3.turn # moi est le premier joueur
+moi.decision( ((3,4), 4) ) == ('A', 1)
+jeu3.state == ((3,4), 4)
 ''' ; testcode(code)
     

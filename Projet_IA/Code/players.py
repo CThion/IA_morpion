@@ -5,10 +5,6 @@
 from classes.abstract_player import Player
 from tools.ezCLI import testcode
 import random
-#########################################################################
-#---------CLEMENT LIT CE MESSAGE------------------
-#ON PEUT FAIRE DES TESTS VIA MAIN_TEST.PY
-#########################################################################
 #=========== les classes à mettre en oeuvre pour le jalon 02 ===========#
 class Human(Player):
   """
@@ -24,15 +20,15 @@ class Human(Player):
       return None
     # maintenant on peut travailler
     print(self.game) #Affichage de la partie avec les règles
-    print("Plateau de jeu: ",self.game.board)
+    print("Plateau de jeu: ", self.game.board)
     print("Actions possibles: ", self.game.actions)
-    choice = input("Où voulez-vous jouer ? Choisissez '1','2' ou '3'")
-    if choice == 1 or choice =='1': choice = self.game.actions[0]
-    if choice == 2 or choice =='2': choice = self.game.actions[1]
-    if choice == 3 or choice =='3': choice = self.game.actions[2]
+    choice = input("Où voulez-vous jouer ? ")
+    if choice =='1': choice = self.game.actions[0]
+    if choice =='2': choice = self.game.actions[1]
+    if choice =='3': choice = self.game.actions[2]
 
     while choice not in self.game.actions:  #Tant que l'input n'est pas valide
-      choice = input('Mauvais choix, réessayez. Où voulez-vous jouer ?') 
+      choice = input('Mauvais choix, réessayez. Où voulez-vous jouer ? : ') 
     return choice
 
 
@@ -64,15 +60,15 @@ class MinMax(Player): #récursif
       return None
     # maintenant on peut travailler
     super().__init__(nom:str='default',jeu:any=None,pf:int)
-    
-  # -----------------------------------------------
-  def __choix(self):
     for a_i in self.game.actions:
-      #calculer s_i le nouvel etat construit par (s,a_i)
+      #calculer s_i le nouvel etat construit par (s,a_i)
+
       v_i = eval_min(s_i,pf-1)
     #return a_j tel que v_j = max(v_1, .. v_k) et j minimum 
+  
+    
   # -----------------------------------------------
-  def __eval_min(self,s,pf):
+  def __eval_min(self,pf):
     """Cherche à minimiser les gains adverses"""
     if pf == 0 : return s
     else:
