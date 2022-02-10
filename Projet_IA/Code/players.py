@@ -30,7 +30,7 @@ class Human(Player):
     while choice not in self.game.actions:  #Tant que l'input n'est pas valide
       choice = input('Mauvais choix, réessayez. Où voulez-vous jouer ? : ') 
     return choice
-
+    #en utilisant input, spécifier isdecimal pour s'assurer que la chaine de caractère ne contient que des nombre
 
 # -----------------------------------------------------------------------
 class Randy(Player):
@@ -59,31 +59,35 @@ class MinMax(Player): #récursif
       print("not my turn to play")
       return None
     # maintenant on peut travailler
-    super().__init__(nom:str='default',jeu:any=None,pf:int)
-    for a_i in self.game.actions:
-      #calculer s_i le nouvel etat construit par (s,a_i)
-
-      v_i = eval_min(s_i,pf-1)
-    #return a_j tel que v_j = max(v_1, .. v_k) et j minimum 
+    pf = self.get_value('pf')
+    v = ()
+    for a in self.game.actions:
+      for etat in selg.game.move(a):
+        v = __eval_max(etat,pf-1)
+    #return a tel que v_j = max(v_1, .. v_k) et j minimum 
   
     
   # -----------------------------------------------
   def __eval_min(self,pf):
     """Cherche à minimiser les gains adverses"""
-    if pf == 0 : return s
+    s = self.game.state
+    v = ()
+    if pf == 0 or self.game.over() == True : return self.estimation()
     else:
-      for k in range(liste):  #Manque à définir liste, cad les s_k construits par (s, a_j)
-        k = eval_max(s,pf-1)
-        liste.append(k)
-      return min(liste)
+      for a in self.game.actions:
+        for etat in self.game.move(a):
+          v.append(__eval_max(etat,pf-1))
+          return min(v)
   # -----------------------------------------------
   def __eval_max(self,pf):
-    if pf == 0 : return s
+    s = self.game.state
+    v = ()
+    if pf == 0 or self.game.over() == True : return self.estimation()
     else:
-      for k in range(liste):  #Manque à définir liste, cad les s_k construits par (s, a_j)
-        k = eval_min(s,pf-1)
-        liste.append(k)
-      return max(liste)
+      for a in self.game.actions:
+        for etat in self.game.move(a):
+          v.append(__eval_min(etat,pf-1))
+          return max(v)
 # -----------------------------------------------------------------------
 class AlphaBeta(Player):
   """
