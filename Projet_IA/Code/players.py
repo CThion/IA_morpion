@@ -23,13 +23,10 @@ class Human(Player):
     print("Plateau de jeu: ", self.game.board)
     print("Actions possibles: ", self.game.actions)
     choice = input("Où voulez-vous jouer ? ")
-    if choice =='1': choice = self.game.actions[0]
-    if choice =='2': choice = self.game.actions[1]
-    if choice =='3': choice = self.game.actions[2]
-
-    while choice not in self.game.actions:  #Tant que l'input n'est pas valide
+    
+    while choice.isdecimal()==False or int(choice)> len(self.game.actions):  #Tant que l'input n'est pas valide
       choice = input('Mauvais choix, réessayez. Où voulez-vous jouer ? : ') 
-    return choice
+    return self.game.actions[int(choice)-1]
     #en utilisant input, spécifier isdecimal pour s'assurer que la chaine de caractère ne contient que des nombre
 
 # -----------------------------------------------------------------------
@@ -43,8 +40,8 @@ class Randy(Player):
       print("not my turn to play")
       return None
     # maintenant on peut travailler
-    c = randrange(len(self.game.actions))
-    return self.game.actions[c]
+    c = random.choice(self.game.actions)
+    return c
 
 # -----------------------------------------------------------------------
 class MinMax(Player): #récursif
@@ -59,35 +56,33 @@ class MinMax(Player): #récursif
       print("not my turn to play")
       return None
     # maintenant on peut travailler
-    pf = self.get_value('pf')
-    v = ()
-    for a in self.game.actions:
-      for etat in selg.game.move(a):
-        v = __eval_max(etat,pf-1)
-    #return a tel que v_j = max(v_1, .. v_k) et j minimum 
+    self.pf = self.get_value('pf')
+    for a_i in self.game.actions:
+      #calculer s_i le nouvel etat construit par (s,a_i)
+
+      v_i = self.__eval_min(pf-1)
+    #return a_j tel que v_j = max(v_1, .. v_k) et j minimum 
   
     
   # -----------------------------------------------
   def __eval_min(self,pf):
     """Cherche à minimiser les gains adverses"""
     s = self.game.state
-    v = ()
-    if pf == 0 or self.game.over() == True : return self.estimation()
+    if pf == 0 or self.game.over() == True : return s
     else:
-      for a in self.game.actions:
-        for etat in self.game.move(a):
-          v.append(__eval_max(etat,pf-1))
-          return min(v)
+      for k in range(liste):  #Manque à définir liste, cad les s_k construits par (s, a_j)
+        k = self.eval_max(s,pf-1)
+        liste.append(k)
+      return min(liste)
   # -----------------------------------------------
   def __eval_max(self,pf):
     s = self.game.state
-    v = ()
-    if pf == 0 or self.game.over() == True : return self.estimation()
+    if pf == 0 or self.game.over() == True : return s
     else:
-      for a in self.game.actions:
-        for etat in self.game.move(a):
-          v.append(__eval_min(etat,pf-1))
-          return max(v)
+      for k in range(liste):  #Manque à définir liste, cad les s_k construits par (s, a_j)
+        k = self.eval_min(s,pf-1)
+        liste.append(k)
+      return max(liste)
 # -----------------------------------------------------------------------
 class AlphaBeta(Player):
   """
@@ -127,8 +122,6 @@ class AlphaBetaNegaMax(Player): #optionnel 2
 
 
 #====================== exemples de code test ==========================#
-from random import randrange
-
 def test_decision(joueur):
     """ joueur est une classe telle que Human, Randy, MinMax """
     code = '''
