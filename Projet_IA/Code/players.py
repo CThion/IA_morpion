@@ -14,40 +14,53 @@ class Human(Player):
   """
   # -----------------------------------------------
   def decision(self, state):
-    self.game.state = state # on met à jour l’état du jeu
+    """reçoit en entrée un état du jeu, dépendant du jeu auxquel on joue
+    Renvoit l'action choisie par l'utilisateur
+    """
+    #--mise à jour de l’état du jeu / vérification validité du joueur
+    self.game.state = state 
     if self.game.turn != self.who_am_i:
       print("not my turn to play")
       return None
-    # maintenant on peut travailler
-    print(self.game) #Affichage de la partie avec les règles
-    print("Plateau de jeu: ", self.game.board)
-    print("Actions possibles: ", self.game.actions)
+    #--Affichage de la partie avec les règles
+    print(f"""
+          Règle et état du jeu : {self.game} \n
+          Plateau de jeu : {self.game.board} \n
+          Actions possibles : {self.game.actions}
+          action {self.game.actions[2]}
+          """)
+    #--choix d'un coup par le joueur
     choice = input("Où voulez-vous jouer ? ")
-    
-    while choice.isdecimal()==False or int(choice)> len(self.game.actions):  #Tant que l'input n'est pas valide
+    while choice.isdecimal()==False or int(choice) not in self.game.actions:  
+      #--Tant que l'input n'est pas valide
       choice = input('Mauvais choix, réessayez. Où voulez-vous jouer ? : ') 
-    return self.game.actions[int(choice)-1]
-    #en utilisant input, spécifier isdecimal pour s'assurer que la chaine de caractère ne contient que des nombre
-
+    return int(choice)
+    #en utilisant input, spécifier isdecimal pour s'assurer que la chaine de caractère 
+    #ne contient que des nombres
+    
+    
 # -----------------------------------------------------------------------
 class Randy(Player):
   """
-  * La méthode de décision renvoie au hasard, grâce à la commande random.choice une des actions possibles du jeu
+  * La méthode de décision renvoie au hasard, grâce à la commande random.choice 
+  une des actions possibles du jeu
   """
   def decision(self, state):
     self.game.state = state # on met à jour l’état du jeu
-    if self.game.turn != self.who_am_i:
+    if self.game.turn != self.who_am_i: #verif joueur valide
       print("not my turn to play")
       return None
-    # maintenant on peut travailler
+    #--
     c = random.choice(self.game.actions)
     return c
 
 # -----------------------------------------------------------------------
 class MinMax(Player): #récursif
   """
-  * Elle va nécessiter, en plus de la méthode decision de deux méthodes privées c’est-à-dire dont le nom sera préfixé par 2 soulignés « __ »
-  * Le but est de parcourir l’arbre des coups possibles jusqu’à une certaine profondeur. 
+  * Elle va nécessiter, en plus de la méthode decision de deux méthodes privées 
+  c’est-à-dire dont le nom sera préfixé par 2 soulignés « __ »
+  * Le but est de parcourir l’arbre des coups possibles jusqu’à une certaine 
+  profondeur. 
   * La profondeur sera donnée au constructeur au moment de la création
   """
   def decision(self, state):
@@ -122,6 +135,13 @@ class AlphaBetaNegaMax(Player): #optionnel 2
 
 
 #====================== exemples de code test ==========================#
+if __name__ == "__main__":
+    from allumettes import Matches
+    jeu = Matches(13, True) # le but prendre la dernière allumette
+    moi = Human('toto', jeu, pf=3)
+    moi.who_am_i = jeu.turn # moi est le premier joueur
+    moi.decision( (7, 6) ) # on attend 1, 2 ou 3 pour Human et Randy
+    #print(jeu) # on attend 7 allumettes
 def test_decision(joueur):
     """ joueur est une classe telle que Human, Randy, MinMax """
     code = '''
@@ -129,7 +149,7 @@ from allumettes import Matches
 jeu = Matches(13, True) # le but prendre la dernière allumette
 print(jeu) # on attend 13 allumettes
 
-moi = joueur('toto', jeu, pf=3)
+moi = Human('toto', jeu, pf=3)
 moi.decision( (3, 4) ) # on attend None
 print(jeu) # on attend 3 allumettes
 
