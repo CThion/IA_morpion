@@ -31,7 +31,7 @@ class Human(Player):
           """)
     #--choix d'un coup par le joueur
     choice = input("Où voulez-vous jouer ? ")
-    while choice.isdecimal()==False or int(choice) not in self.game.actions:  
+    while choice.isdecimal()==False or int(choice) not in range(1,len(self.game.actions)+1):  
       #--Tant que l'input n'est pas valide
       choice = input('Mauvais choix, réessayez. Où voulez-vous jouer ? : ') 
     return int(choice)
