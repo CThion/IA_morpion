@@ -34,7 +34,7 @@ class Human(Player):
     while choice.isdecimal()==False or int(choice) not in range(1,len(self.game.actions)+1):  
       #--Tant que l'input n'est pas valide
       choice = input('Mauvais choix, réessayez. Où voulez-vous jouer ? : ') 
-    return int(choice)
+    return self.game.actions[int(choice)]
     #en utilisant input, spécifier isdecimal pour s'assurer que la chaine de caractère 
     #ne contient que des nombres
     
