@@ -57,43 +57,48 @@ class Randy(Player):
 # -----------------------------------------------------------------------
 class MinMax(Player): #récursif
   """
-  * Elle va nécessiter, en plus de la méthode decision de deux méthodes privées 
-  c’est-à-dire dont le nom sera préfixé par 2 soulignés « __ »
-  * Le but est de parcourir l’arbre des coups possibles jusqu’à une certaine 
-  profondeur. 
+  * Elle va nécessiter, en plus de la méthode decision de deux méthodes privées, c’est-à-dire dont le nom sera préfixé par 2 soulignés « __ »
+  * Le but est de parcourir l’arbre des coups possibles jusqu’à une certaine profondeur. 
   * La profondeur sera donnée au constructeur au moment de la création
   """
   def decision(self, state):
     self.game.state = state # on met à jour l’état du jeu
-    if self.game.turn != self.who_am_i:
+    if self.game.turn != self.who_am_i: #verif joueur valide
       print("not my turn to play")
       return None
-    # maintenant on peut travailler
-    self.pf = self.get_value('pf')
-    for a_i in self.game.actions:
-      #calculer s_i le nouvel etat construit par (s,a_i)
-
-      v_i = self.__eval_min(pf-1)
-    #return a_j tel que v_j = max(v_1, .. v_k) et j minimum 
-  
+    #--
+    pf = self.get_value('pf') #on récupère la profondeur
+    if self.pf == 0 :return random.choice(self.game.actions) #à demander au prof
+    liste_vi=[]
+    #--
+    for a_i in self.game.actions:   #pour chaque action
+      self.game.move(a_i)           #je prend l'une des actions disponible
+      v_i = self.__eval_min(pf-1)   #je minimise d'abord le gain adverse à la profondeur suivante 
+      liste_vi.append(v_i)
+      self.game.undo()              #je reviens à l'état précédent
     
+    return self.game.actions[liste_vi.index(max(liste_vi))] #manque à intégrer le 'j minimum'
+
   # -----------------------------------------------
   def __eval_min(self,pf):
     """Cherche à minimiser les gains adverses"""
     s = self.game.state
-    if pf == 0 or self.game.over() == True : return s
+    liste=[]
+    if pf == 0 or self.game.over() == True : return self.estimation()
     else:
-      for k in range(liste):  #Manque à définir liste, cad les s_k construits par (s, a_j)
-        k = self.eval_max(s,pf-1)
+      #for s_k in self.game.move([for s in range(self.game.actions)]):  #Manque à définir liste, cad les s_k construits par (s, a_j)
+        k = self.__eval_max(pf-1)
         liste.append(k)
       return min(liste)
+
   # -----------------------------------------------
   def __eval_max(self,pf):
+    """Cherche à maximiser les gains du joueur"""
     s = self.game.state
-    if pf == 0 or self.game.over() == True : return s
+    if pf == 0 or self.game.over() == True : return self.estimation()
     else:
       for k in range(liste):  #Manque à définir liste, cad les s_k construits par (s, a_j)
-        k = self.eval_min(s,pf-1)
+        k = self.__eval_min(s,pf-1)
         liste.append(k)
       return max(liste)
 # -----------------------------------------------------------------------
