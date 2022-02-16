@@ -68,7 +68,7 @@ class MinMax(Player): #récursif
       return None
     #--
     pf = self.get_value('pf') #on récupère la profondeur
-    if self.pf == 0 :return random.choice(self.game.actions) #à demander au prof
+    if pf == 0 :return random.choice(self.game.actions) #à demander au prof
     liste_vi=[]
     #--
     for a_i in self.game.actions:   #pour chaque action
@@ -76,30 +76,35 @@ class MinMax(Player): #récursif
       v_i = self.__eval_min(pf-1)   #je minimise d'abord le gain adverse à la profondeur suivante 
       liste_vi.append(v_i)
       self.game.undo()              #je reviens à l'état précédent
-    
-    return self.game.actions[liste_vi.index(max(liste_vi))] #manque à intégrer le 'j minimum'
-
+    maximum = 0
+    for elem in range(len(liste_vi)-1): #récupère la plus grande valeur, et sauvegarde la place de la 1ère occurence
+      if liste_vi[elem]<liste_vi[elem+1]:
+        maximum = liste_vi.index(liste_vi[elem+1])
+    return self.game.actions[maximum] 
   # -----------------------------------------------
   def __eval_min(self,pf):
     """Cherche à minimiser les gains adverses"""
-    s = self.game.state
     liste=[]
     if pf == 0 or self.game.over() == True : return self.estimation()
-    else:
-      #for s_k in self.game.move([for s in range(self.game.actions)]):  #Manque à définir liste, cad les s_k construits par (s, a_j)
-        k = self.__eval_max(pf-1)
-        liste.append(k)
+    else:                                       
+      for actions in self.game.actions:
+        self.game.move(actions)
+        v_i = self.__eval_max(pf-1)
+        liste.append(v_i)
+        self.game.undo()
       return min(liste)
-
   # -----------------------------------------------
   def __eval_max(self,pf):
     """Cherche à maximiser les gains du joueur"""
     s = self.game.state
+    liste=[]
     if pf == 0 or self.game.over() == True : return self.estimation()
     else:
-      for k in range(liste):  #Manque à définir liste, cad les s_k construits par (s, a_j)
-        k = self.__eval_min(s,pf-1)
-        liste.append(k)
+      for actions in self.game.actions:
+        self.game.move(actions)
+        v_i = self.__eval_min(pf-1)
+        liste.append(v_i)
+        self.game.undo()
       return max(liste)
 # -----------------------------------------------------------------------
 class AlphaBeta(Player):
