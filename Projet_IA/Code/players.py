@@ -35,10 +35,6 @@ class Human(Player):
       #--Tant que l'input n'est pas valide
       choice = input('Mauvais choix, réessayez. Où voulez-vous jouer ? : ') 
     return self.game.actions[int(choice)]
-    #en utilisant input, spécifier isdecimal pour s'assurer que la chaine de caractère 
-    #ne contient que des nombres
-    
-    
 # -----------------------------------------------------------------------
 class Randy(Player):
   """
@@ -51,9 +47,7 @@ class Randy(Player):
       print("not my turn to play")
       return None
     #--
-    c = random.choice(self.game.actions)
-    return c
-
+    return random.choice(self.game.actions)
 # -----------------------------------------------------------------------
 class MinMax(Player): #récursif
   """
@@ -68,7 +62,6 @@ class MinMax(Player): #récursif
       return None
     #--
     pf = self.get_value('pf') #on récupère la profondeur
-    if pf == 0 :return random.choice(self.game.actions) #à demander au prof
     liste_vi=[]
     #--
     for a_i in self.game.actions:   #pour chaque action
@@ -76,10 +69,8 @@ class MinMax(Player): #récursif
       v_i = self.__eval_min(pf-1)   #je minimise d'abord le gain adverse à la profondeur suivante 
       liste_vi.append(v_i)
       self.game.undo()              #je reviens à l'état précédent
-    maximum = 0
-    for elem in range(len(liste_vi)-1): #récupère la plus grande valeur, et sauvegarde la place de la 1ère occurence
-      if liste_vi[elem]<liste_vi[elem+1]:
-        maximum = liste_vi.index(liste_vi[elem+1])
+    #--
+    maximum = liste_vi.index(max(liste_vi))
     return self.game.actions[maximum] 
   # -----------------------------------------------
   def __eval_min(self,pf):
@@ -96,7 +87,6 @@ class MinMax(Player): #récursif
   # -----------------------------------------------
   def __eval_max(self,pf):
     """Cherche à maximiser les gains du joueur"""
-    s = self.game.state
     liste=[]
     if pf == 0 or self.game.over() == True : return self.estimation()
     else:
@@ -109,15 +99,57 @@ class MinMax(Player): #récursif
 # -----------------------------------------------------------------------
 class AlphaBeta(Player):
   """
-  Docstring à rajouter
+  Algorithme du MinMax optimisé en donnant des bornes alpha et beta, qui réduisent le champ des possibles.
   """
   def decision(self, state):
     self.game.state = state # on met à jour l’état du jeu
     if self.game.turn != self.who_am_i:
       print("not my turn to play")
       return None
-    # maintenant on peut travailler
+    #--
+    pf = self.get_value('pf') #on récupère la profondeur
+    alpha = -1000 #alpha et beta ne sont pas choisies par l'utilisateur
+    beta = 1000   #valeurs arbitraires données
+    liste_vi=[]
+    #--
+    for a_i in self.game.actions:   #pour chaque action
+      self.game.move(a_i)           #j'avance sur l'une des actions disponible
+      v_i = self.__coupe_alpha(pf-1, alpha, beta)   #on diminue d'abord la borne beta 
+      liste_vi.append(v_i)
+      self.game.undo()              #je reviens à l'état précédent
+    #--
+    maximum = liste_vi.index(max(liste_vi))
+    return self.game.actions[maximum] 
   # -----------------------------------------------
+  def __coupe_alpha(self, pf, alpha, beta):
+    """MIN cherche a diminuer beta"""
+    if pf == 0 or self.game.over() == True : return self.estimation()
+    else:                                       
+      for actions in self.game.actions:
+        self.game.move(actions)
+        i = 1
+        while i<=len(self.game.actions) and alpha<beta:
+          v_i = self.__coupe_beta(pf-1, alpha, beta)
+          if v_i <= alpha: return alpha
+          beta = min(beta,v_i)
+          i = i+1
+        self.game.undo()
+      return beta
+  # -----------------------------------------------
+  def __coupe_beta(self, pf, alpha, beta):
+    """MAX cherche a augmenter alpha"""
+    if pf == 0 or self.game.over() == True : return self.estimation()
+    else:                                       
+      for actions in self.game.actions:
+        self.game.move(actions)
+        i = 1
+        while i<=len(self.game.actions) and alpha<beta:
+          v_i = self.__coupe_alpha(pf-1, alpha, beta)
+          if v_i >= beta: return beta
+          alpha = max(alpha,v_i)
+          i = i+1
+        self.game.undo()
+      return alpha
 # -----------------------------------------------------------------------
 class NegaMax(Player):  #optionnel 1
   """
@@ -129,11 +161,47 @@ class NegaMax(Player):  #optionnel 1
       print("not my turn to play")
       return None
     # maintenant on peut travailler
+    pf = self.get_value('pf') #on récupère la profondeur
+    if pf == 0 :return random.choice(self.game.actions) #à demander au prof
+    liste_vi=[]
+    #--
+    for a_i in self.game.actions:   #pour chaque action
+      self.game.move(a_i)           #je prend l'une des actions disponible
+      v_i = self.__eval_negamax(pf-1)   #je minimise d'abord le gain adverse à la profondeur suivante 
+      liste_vi.append(v_i)
+      self.game.undo()              #je reviens à l'état précédent
+    #--
+    maximum = liste_vi.index(max(liste_vi))
+    return self.game.actions[maximum] 
   # -----------------------------------------------
+  def __eval_negamax(self,pf):  #A reprendre
+    """Objectif : regrouper eval_min et eval_max en 1 methode"""  #Pas d'utilisation de la propriété
+    polarite = True                                               #donnée, essayer de l'implémenter
+    if pf == 0 or self.game.over() == True : return self.estimation()
+    else:
+      if polarite == True :
+        liste=[]
+        for actions in self.game.actions:
+          self.game.move(actions)
+          v_i = self.__eval_negamax(pf-1)
+          liste.append(v_i)
+          self.game.undo()
+        polarite = False
+        return min(liste)
+      else :
+        liste=[]
+        for actions in self.game.actions:
+          self.game.move(actions)
+          v_i = self.__eval_negamax(pf-1)
+          liste.append(v_i)
+          self.game.undo()
+        polarite = False
+        return max(liste)
   # -----------------------------------------------------------------------
-class AlphaBetaNegaMax(Player): #optionnel 2
+class NegAlphaBeta(Player): #optionnel 2
   """
-  Docstring à rajouter
+  Implémentation similaires à celle de Negamax avec MinMax ;
+  Regrouper coupe_alpha et coupe_beta en 1 seul coupe_alpha qui appelle -coupe_alpha
   """
   def decision(self, state):
     self.game.state = state # on met à jour l’état du jeu
@@ -142,8 +210,8 @@ class AlphaBetaNegaMax(Player): #optionnel 2
       return None
     # maintenant on peut travailler
   # -----------------------------------------------
-
-
+  def __coupe_alpha(self, pf, alpha, beta):
+    pass
 #====================== exemples de code test ==========================#
 if __name__ == "__main__":
     from allumettes import Matches
