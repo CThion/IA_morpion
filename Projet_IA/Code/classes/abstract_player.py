@@ -39,7 +39,7 @@ class Player:
 
         self.__name = str(nom).strip()
         jeu.reset()
-        self.__game = jeu
+        self.__game = jeu 
         self.__who = None
         self.__idnum = self.ID+1
         Player.ID += 1
@@ -54,15 +54,19 @@ class Player:
         return self.name == other.name
     @property
     def idnum(self) -> int:
+        """ unique id number """
         return self.__idnum
     @property
     def name(self) -> str:
+        """ the name of the player """
         return self.__name+"_{:02d}".format(self.idnum)
     @property
     def game(self) -> any:
+        """ what is the game the player is playing """
         return self.__game
     @property
     def who_am_i(self) -> any:
+        """ either game.turn or game.opponent """
         return self.__who
     @who_am_i.setter
     def who_am_i(self, v):

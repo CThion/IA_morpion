@@ -77,7 +77,6 @@ class TestLoop(unittest.TestCase):
         mock_input.side_effect = "d e F G u v".split()
         self.o = self.K('moi', self.jeu)
         self.o.who_am_i = self.jeu.turn
-        self.jeu.reset()
         _rep = []
         try:
             _rep.append(self.o.decision(self.jeu.state))
@@ -87,6 +86,22 @@ class TestLoop(unittest.TestCase):
         self.assertEqual(len(_rep), 0,
                          "expect no decision")
 
+    @patch('builtins.input')
+    def test_bad_reading_2(self, mock_input):
+        """ check loop over bad input """
+        self.o = self.K('moi', self.jeu)
+        self.o.who_am_i = self.jeu.turn
+        _0 = len(self.jeu.actions)
+        mock_input.side_effect = [str(x) for x in (-2, -1, _0, _0+1)]
+        _rep = []
+        try:
+            _rep.append(self.o.decision(self.jeu.state))
+        except Exception as _e:
+            self.assertTrue(isinstance(_e, StopIteration),
+                            "expect failure")
+        self.assertEqual(len(_rep), 0,
+                         "expect no decision")
+        
 class TestDefault(unittest.TestCase):
     """ check the correct default behavior of 'THAT' """
     def setUp(self):

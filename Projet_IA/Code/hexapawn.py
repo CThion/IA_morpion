@@ -26,12 +26,15 @@ class Hexapawn(Game):
                          cylindre=bool(cylindre), priorite=bool(priorite))
 
     def reset(self):
+        """ restart the game """
         super().reset() # on appelle reset de la classe parente
         self.__board = copy.deepcopy(self.__init_board) # copie
         self.__winner = None
 
     @property
-    def board(self): return tuple(self.__board)
+    def board(self):
+        """ internal representation of the board """
+        return tuple(self.__board)
 
     def show_msg(self) -> str:
         """ le message à ajouter """
@@ -52,6 +55,7 @@ class Hexapawn(Game):
 
     @property
     def hash_code(self) -> str:
+        """ required to be stored in memolry """
         return ''.join([''.join([c for c in l])
                         for l in self.board])
 
@@ -84,6 +88,7 @@ class Hexapawn(Game):
 
     @property
     def state(self) -> tuple:
+        """ return the current state of the game """
         return self.hash_code, self.timer
     @state.setter
     def state(self, cfg:tuple):
@@ -152,7 +157,9 @@ class Hexapawn(Game):
     def move(self, action:tuple):
         """ we got some action ((x,y), (a,b))
             we store the current state <board, timer>
-            we change board and timer """
+            we change board and timer 
+            return NOTHING, changes state !!!
+        """
         if action in self.actions: # move is allowed
             src, target = action
             x,y = src
@@ -185,12 +192,12 @@ class Hexapawn(Game):
         return self.__winner
     
     def win(self) -> bool:
-        """ détection si on a un gagnant lors de la dernière action faite """
+        """ win is True iff there is a winner """
         return self.__winner is not None
 
     def over(self) -> bool:
         """ the game ended when there is a win (no draw allowed) """
-        return self.win()
+        return self.actions == ()
 
 def test_1():
     code = '''

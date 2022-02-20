@@ -11,11 +11,10 @@ A tour de rôle un joueur
 chaque boite doit contenir au moins un jeton
 * la partie s'arrete quand un joueur ne peut pas respecter les règles
 * le gagnant est celui qui a empêcher l'autre de jouer
-* gauche <= droite (traitement symmétrique)
 
 exemple
-[ 2, 5]. Le joueur qui a le trait vide la boite B
-et répartit les jetons de la boite A
+[ 5, 2]. Le joueur qui a le trait vide la boite A
+et répartit les jetons de la boite B
 l'adversaire doit jouer avec [1, 1]
 il ne peut pas respecter les règles (impossible de répartir le résidu)
 la partie s'arrête et le joueur est déclaré perdant
@@ -32,11 +31,8 @@ class Divide(Game):
         box1: nombre de jetons dans la boite 1
         box2: nombre de jetons dans la boite 2
         """
-        if self.__valid(box1, box2):
-            self.__board = [min(box1, box2), max(box1, box2)]
-        else:
-            a, b = random.choices(range(1,11), k=2)
-            self.__board = [min(a, b), max(a, b)]
+        if self.__valid(box1, box2): self.__board = [box1, box2]
+        else: self.__board = random.choices(range(1,11), k=2)
         self.__init_board = self.__board[:]
         super().__init__(*self.__init_board, label=bool(label))
 
@@ -51,16 +47,13 @@ class Divide(Game):
     @state.setter
     def state(self, cfg:tuple):
         if self.valid_state(cfg):
-            self.__board = min(cfg[0]), max(cfg[0])
-            self.timer = cfg[1]
-
-    def __valid(self, *boxes) -> bool:
+            self.__board = cfg[0] ; self.timer = cfg[1]
+    def __valid(self, *cfg) -> bool:
         """ 2 boxes of non zero natural int """
-        return (len(boxes) == 2 and
-                boxes[0] > 0 and
-                boxes[1] > 0 and
-                all([isinstance(x, int) for x in boxes]))
-        
+        if len(cfg) != 2: return False
+        if cfg[0] <= 0 or cfg[1] <= 0: return False
+        if any([not isinstance(x, int) for x in cfg]): return False
+        return True
     def valid_state(self, cfg:tuple) -> bool:
         """ is this configuration fine """
         if len(cfg) != 2: return False
@@ -72,15 +65,16 @@ class Divide(Game):
             a,b = self.__init_board
             return sum(_boxes) == a or sum(_boxes) == b
         return sum(_boxes) <= self.__init_board[1] - _timer
-
+    
     @property
     def actions(self) -> tuple:
         """ which box to remove, how many in 1st box """
         if self.over(): return ()
         _boxes = "AB"
+        _sz = len(_boxes)
         return tuple([ (_boxes[i], k)
-                       for i in range(2)
-                       for k in range(1, self.board[(i+1)%2]//2+1) ])
+                       for i in range(_sz)
+                       for k in range(1, self.board[(i+1)%2]) ])
     @property
     def winner(self):
         """ defines the winner """
@@ -105,10 +99,12 @@ class Divide(Game):
         _ = self.pop_history()
         if _ is not None:
             self.state = _
-    def show_msg(self):
+
+    def show_msg(self) -> str:
         return ("Coup(s) joué(s) = {}, trait au joueur {}\n"
                 "".format(self.timer, self.turn+1))
-    def __str__(self):
+
+    def __str__(self) -> str:
         """ Modification de l'affichage par défaut """
         _msg = """
 A & B : 2 boites contenant des jetons
@@ -129,18 +125,17 @@ Le perdant est celui qui ne peut pas respecter les règles
             _msg += ("Partie terminée, gagnant '{}'\n"
                      .format(self.winner+1))
         return _msg
-    
+
     @property
     def hash_code(self):
         return int("{:02d}{:02d}".format(*self.board))
-
 
 if __name__ == '__main__':
     code = '''
 jeu = Divide(7, 17)
 s0 = jeu.state
 jeu.hash_code
-len(jeu.actions) # 11 actions possibles
+len(jeu.actions) # 22 actions possibles
 
 jeu.move(jeu.actions[3])
 s1 = jeu.state
@@ -161,3 +156,4 @@ jeu.valid_state( ( (2,1), 2) )# True
 jeu.valid_state( ( (1,2), 2) )# True
 jeu.valid_state( ( (13,4), 2) )# False
 ''' ; testcode(code)
+    

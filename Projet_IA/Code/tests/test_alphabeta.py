@@ -4,8 +4,8 @@
 
 __author__ = "mmc <marc-michel dot corsini at u-bordeaux dot fr>"
 __date__ = "19.02.21"
-__usage__ = "Project 2022: tests jalon 02: MinMax"
-__update__ = "07.02.22"
+__usage__ = "Project 2022: tests jalon 02: AlphaBeta"
+__update__ = "18.02.22"
 
 import os
 import unittest
@@ -18,16 +18,16 @@ from morpion import Morpion
 
 
 ###
-THAT="MinMax"
+THAT="AlphaBeta"
 
 def mock_prn(*args, **kargs):
     """ no output allowed """
     pass
 
 class TestKlass(unittest.TestCase):
-    """ Is 'MinMax' correctly setup """
+    """ Is 'AlphaBeta' correctly setup """
     def test_sub(self):
-        """ MinMax is a Player """
+        """ AlphaBeta is a Player """
         klass = THAT
         player = "Player"
         chk.check_class(tp, player)
@@ -71,7 +71,7 @@ class TestPrivacy(unittest.TestCase):
                          "".format(_latt_slots))
         
 class TestDefault(unittest.TestCase):
-    """ check the correct default behavior of 'MinMax' """
+    """ check the correct default behavior of 'AlphaBeta' """
     def setUp(self):
         chk.check_class(tp, THAT)
         self.jeu = A(17)
@@ -238,6 +238,7 @@ def suite(fname):
     for klass_t in klasses:
         sweet.addTest(unittest.makeSuite(klass_t))
     return sweet
+
 
 if __name__ == "__main__":
     param = input("quel est le fichier à traiter ? ")

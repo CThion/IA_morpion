@@ -49,7 +49,7 @@ class Statistics:
         self.__game = repr(g)
         self.__colors = (g.turn, g.opponent)
         self.__names = p1, p2
-        self.__keys = "pv sigma avg_victories avg_stones".split()
+        self.__keys = "pv moves avg_victories avg_moves".split()
         self.__labels = {self.__keys[i+2]: self.__keys[i]
                          for i in range(2)}
         self.__data = {k:
@@ -74,8 +74,8 @@ class Statistics:
                              *self.__names, self.__game)
                                              
     def add_result(self, values:Sized, names:Sized):
-        """ update pv and sigma information 
-            requires pv, sigma in self.__keys
+        """ update pv and moves information 
+            requires pv, moves in self.__keys
         """
 
         if len(values) != 2 or len(names) != 2:
@@ -98,8 +98,8 @@ class Statistics:
                 self.__data['pv'][self.__colors[i]] += 1
                 self.__data['pv'][names[i]] += 1
         for i in range(2):
-            self.__data['sigma'][self.__colors[i]] += values[i]
-            self.__data['sigma'][names[i]] += values[i]
+            self.__data['moves'][self.__colors[i]] += values[i]
+            self.__data['moves'][names[i]] += values[i]
             
     def __build_avg(self):
         """ helper to build avg points 
@@ -129,7 +129,9 @@ class Statistics:
     def specific_statistic(self, subkey:str) -> dict:
         """ provides statistic for a specific key """
         if self.__count != 0: self.__build_avg()
-        if subkey not in self.subkeys: return {}
+        if subkey not in self.subkeys:
+            print("subkey expected belongs to {}".format(self.subkeys))
+            return {}
         return {key: self.__data[key][subkey]
             for key in self.keys}
 

@@ -39,6 +39,7 @@ class Morpion(Game):
                          tore=bool(tore), phase=style)
 
     def reset(self):
+        """ restart the game """
         super().reset() # reset classe parente
         self.__board = copy.deepcopy(self.__init_board) # copie
         # on sait que le tablier est carré
@@ -46,8 +47,15 @@ class Morpion(Game):
                         for y in range(len(self.__board)) ]
         self.__winner = None
 
+    def clone(self):
+        """ redefined 'coz so different """
+        return self.__class__(*[self.get_parameter(att)
+                                for att in "nbl tore phase".split()])
+
     @property
-    def board(self): return tuple(self.__board)
+    def board(self):
+        """ internal representation of the game """
+        return tuple(self.__board)
         
     def show_msg(self) -> str:
         """ le message à ajouter """
@@ -64,6 +72,7 @@ class Morpion(Game):
         
     @property
     def hash_code(self) -> str:
+        """ will be needed for memory storage """
         return ''.join([''.join([c for c in l])
                         for l in self.board])
 
@@ -171,6 +180,7 @@ class Morpion(Game):
     
     @property
     def state(self) -> tuple:
+        """ return the current state of the game """
         return self.hash_code, self.timer
     @state.setter
     def state(self, cfg:tuple):
@@ -299,14 +309,15 @@ class Morpion(Game):
         if len(_candidates) < size: return False
         return self.__diagnostic(_candidates, last, size, 1)
 
-    def __check_win(self, c:tuple):
+    def __check_win(self, c:tuple, pawn:str) -> bool:
         """ given the last stone position, check alignment """
         _line = self.get_parameter('ligne')
         _nbl =  self.get_parameter('nbl')
         _nbc =  self.get_parameter('nbc')
         if self.timer+1 < 2*_line -1: return False
+        _who = self.PAWN[self.turn+1] if pawn == self.PAWN[0] else pawn
         _pawns = [ (x,y) for x in range(_nbl) for y in range(_nbc)
-                   if self.__board[x][y] == self.PAWN[self.turn+1] ]
+                   if self.__board[x][y] == _who ]
         # lazy evaluation, simplest first
         if (self.__win_col(_pawns, c, _line) or
             self.__win_line(_pawns, c, _line) or
@@ -336,6 +347,7 @@ class Morpion(Game):
         """
         action is a cell coordinates
         a,b is the coordinate where the last stone has been played
+        return NOTHING, affect the current state
         """
         if action in self.actions: # move is allowed
             if self.timer < self.get_parameter('pierres'):
@@ -351,7 +363,7 @@ class Morpion(Game):
                 self.__board[x][y] = self.PAWN[0]
                 self.__free = [ action ] # one cell is free
             self.add_history(_data)
-            self.__check_win( (a,b) )
+            self.__check_win( (a,b), self.PAWN[0] )
             self.timer += 1
 
     def undo(self):
@@ -362,6 +374,7 @@ class Morpion(Game):
                 a,b = _[1]
                 self.__board[a][b] = self.PAWN[0]
                 self.__free.append( _[1] )
+                self.__free.sort() # pour parcourir actions avec range()
             else:
                 a,b = _[1]
                 x,y = _[2]
@@ -382,7 +395,8 @@ class Morpion(Game):
     @property
     def winner(self):
         """ None it's either a draw or non ending game """
-        return self.__winner
+        return (self.__winner if self.__winner is None
+                else self.PAWN[self.__winner+1])
 
     def win(self) -> bool:
         """ win is True iff there is a winner """
