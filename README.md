@@ -9,11 +9,22 @@ pour masquer les valeurs, permet d'utiliser les fonctions comme des variables.
 
 len([index for index, element in enumerate(move) if element == 'O'])
 
-## Questions jalon02
+# Jalon\_02
+
+## Questions jalon\_02
 - Où met-t-on exactement les import . (zone tests ou bien où c'est vraiment nécessaire ?)
 - Les classes doivent vraiment être indépendantes du jeu ? (exemple MinMax compliqué)
 
-## Arboresence des import
+## Arborescence des import
 - abstract_game ==> morpion, hexapawn, allumettes, divide_left
 - abstract_game + abstract_player ==> main_parties
+
+## Algorithme MinMax
+
+- eval_min : s’appliques aux sommets gérés par l’adversaires
+- eval_max : s’appliques aux sommets gérés par le joueur
+- pf : self.get_value(‘pf’)
+- self.game.move(a) : modifie état du jeu en faisant l’action a (choisie parmi self.game.actions)
+- self.game.undo() : revient au s précédent
+  - :warning: move et undo ne renvoient rien mais modifie s 
 
