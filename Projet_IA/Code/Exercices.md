@@ -26,3 +26,19 @@ Tous les sommets pouvant être atteint, en partant de la racine par un chemin de
 
 ## Exercice 2
 
+1. Quelle est la décision à la racine?
+
+   
+
+2. Donnez l’ordre de visite des sommets de l’arbre, l’ordre est obtenu par le premier accès au
+  cours du parcours en profondeur d’abord.
+
+3. Quels sont les sommets qui peuvent modiﬁer la valeur de α ?
+
+4. Quels sont les sommets qui peuvent modiﬁer la valeur de β ?
+
+5. Y-a-t-il des sommets non visités par l’algorithme de l’alpha-beta?
+
+6. Donnez la valeur ﬁnale renvoyée par les sommets visités de l’arbre sauf celles des feuilles,
+ainsi que les valeurs de α et β lorsqu’on accède pour la première fois au sommet et lorsqu’on
+quitte le sommet.

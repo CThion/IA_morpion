@@ -105,7 +105,10 @@ class MinMax(Player): #récursif
 # -----------------------------------------------------------------------
 class AlphaBeta(Player):
   """
-  Algorithme du MinMax optimisé en donnant des bornes alpha et beta, qui réduisent le champ des possibles.
+  Algorithme du MinMax optimisé en donnant des bornes alpha et beta, 
+  qui réduisent le champ des possibles (Branch&Brant).
+  Alpha = borne sup
+  Beta = borne inf
   """
   def decision(self, state):
     self.game.state = state # on met à jour l’état du jeu
@@ -114,15 +117,20 @@ class AlphaBeta(Player):
       return None
     #--
     pf = self.get_value('pf') #on récupère la profondeur
-    alpha = -1000 #alpha et beta ne sont pas choisies par l'utilisateur
-    beta = 1000   #valeurs arbitraires données
+    alpha = -101 #alpha et beta ne sont pas choisies par l'utilisateur
+    beta = 101  #  +- self.WIN +-1 (aide_jalon_02 p11)
     liste_vi=[]
     #--
     for a_i in self.game.actions:   #pour chaque action
+      #--changement d'état
       self.game.move(a_i)           #j'avance sur l'une des actions disponible
+      #--récupération informations
       v_i = self.__coupe_alpha(pf-1, alpha, beta)   #on diminue d'abord la borne beta 
       liste_vi.append(v_i)
-      self.game.undo()              #je reviens à l'état précédent
+      #--retour à l'état précédent
+      self.game.undo()
+      #--traitement de l'information (sortie possible)
+      
     #--
     maximum = liste_vi.index(max(liste_vi))
     return self.game.actions[maximum] 
@@ -130,32 +138,28 @@ class AlphaBeta(Player):
   def __coupe_alpha(self, pf, alpha, beta):
     """MIN cherche a diminuer beta"""
     if pf == 0 or self.game.over() == True : return self.estimation()
-    else:                                       
-      for actions in self.game.actions:
-        self.game.move(actions)
-        i = 1
-        while i<=len(self.game.actions) and alpha<beta:
-          v_i = self.__coupe_beta(pf-1, alpha, beta)
-          if v_i <= alpha: return alpha
-          beta = min(beta,v_i)
-          i = i+1
-        self.game.undo()
-      return beta
+    i = 0
+    while i<len(self.game.actions) and alpha<beta:
+      self.game.move(self.game.actions[i])
+      v_i = self.__coupe_beta(pf-1, alpha, beta) #chaîne récursive
+      self.game.undo()
+      if v_i <= alpha: return alpha
+      beta = min(beta, v_i)
+      i = i+1
+    return beta
   # -----------------------------------------------
   def __coupe_beta(self, pf, alpha, beta):
-    """MAX cherche a augmenter alpha"""
+    """MIN cherche a diminuer beta"""
     if pf == 0 or self.game.over() == True : return self.estimation()
-    else:                                       
-      for actions in self.game.actions:
-        self.game.move(actions)
-        i = 1
-        while i<=len(self.game.actions) and alpha<beta:
-          v_i = self.__coupe_alpha(pf-1, alpha, beta)
-          if v_i >= beta: return beta
-          alpha = max(alpha,v_i)
-          i = i+1
-        self.game.undo()
-      return alpha
+    i = 0
+    while i<len(self.game.actions) and alpha<beta:
+      self.game.move(self.game.actions[i])
+      v_i = self.__coupe_alpha(pf-1, alpha, beta) #chaîne récursive
+      self.game.undo()
+      if v_i >= beta: return beta
+      alpha = max(alpha, v_i)
+      i = i+1
+    return beta
 # -----------------------------------------------------------------------
 class NegaMax(Player):  #optionnel 1
   """
