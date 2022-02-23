@@ -62,16 +62,18 @@ class MinMax(Player): #récursif
       return None
     #-- récupération paramètres
     pf = self.get_value('pf') #on récupère la profondeur
+    v_best = -1000
+    a_best = None
     liste_vi=[]
     #-- parcours arbre
-    for a_i in self.game.actions:   #pour chaque action à partir de la racine
-      self.game.move(a_i)           #on essaie les actions une par une
-      v_i = self.__eval_min(pf-1)   #je minimise d'abord le gain adverse à la profondeur suivante 
-      liste_vi.append(v_i)          #sauvegarde de la valeur renvoyée
+    for a in self.game.actions:   #pour chaque action à partir de la racine
+      self.game.move(a)           #on essaie les actions une par une
+      v = self.__eval_min(pf-1)   #je minimise d'abord le gain adverse à la profondeur suivante 
+      if v > v_best:
+          v_best = v
+          a_best = a
       self.game.undo()              #je reviens à l'état précédent
-    #--calcul final
-    maximum = liste_vi.index(max(liste_vi))
-    return self.game.actions[maximum] 
+    return a_best 
 
   # -----------------------------------------------
   def __eval_min(self, pf):
