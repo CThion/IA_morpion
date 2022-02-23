@@ -5,7 +5,7 @@
 __author__ = "mmc <marc-michel dot corsini at u-bordeaux dot fr>"
 __date__ = "19.02.21"
 __usage__ = "Project 2022: tests jalon 02: AlphaBeta"
-__update__ = "18.02.22"
+__update__ = "22.02.22"
 
 import os
 import unittest
@@ -108,9 +108,9 @@ class TestMatches(unittest.TestCase):
         _0 = self.o.decision( (3,4) )
         self.assertEqual(_0, 3, "expected 3 found {}".format(_0))
         _1 = self.o.decision( (5,4) )
-        self.assertEqual(_1, 1, "expected 1 found {}".format(_0))
-        _1 = self.o.decision( (6,4) )
-        self.assertEqual(_1, 2, "expected 2 found {}".format(_0))
+        self.assertEqual(_1, 1, "expected 1 found {}".format(_1))
+        _2 = self.o.decision( (6,4) )
+        self.assertEqual(_2, 2, "expected 2 found {}".format(_2))
 
     @patch('builtins.print')    
     def test_leave_last(self, mock_prn):
@@ -121,12 +121,12 @@ class TestMatches(unittest.TestCase):
         _0 = self.o.decision( (3,4) )
         self.assertEqual(_0, 2, "expected 2 found {}".format(_0))
         _1 = self.o.decision( (5,4) )
-        self.assertEqual(_1, 1, "expected 1 found {}".format(_0))
-        _1 = self.o.decision( (6,4) )
-        self.assertEqual(_1, 1, "expected 1 found {}".format(_0))
+        self.assertEqual(_1, 1, "expected 1 found {}".format(_1))
+        _2 = self.o.decision( (6,4) )
+        self.assertEqual(_2, 1, "expected 1 found {}".format(_2))
         
 class TestBoxes(unittest.TestCase):
-    """ find the best action for matches """
+    """ find the best action for boxes """
     def setUp(self):
         chk.check_class(tp, THAT)
         self.jeu = B(7,17)
@@ -144,7 +144,7 @@ class TestBoxes(unittest.TestCase):
 
 
 class TestHexaPawn(unittest.TestCase):
-    """ do we find the best move """
+    """ do we find the best move for HexaPawn """
     def setUp(self):
         klass = THAT
         chk.check_class(tp, klass)
@@ -169,7 +169,7 @@ class TestHexaPawn(unittest.TestCase):
                          "expected {}, found {}".format(_1, _rep[0]))
         
 class TestMorpion(unittest.TestCase):
-    """ do we find the best move """
+    """ do we find the best move for Morpion """
     def setUp(self):
         klass = THAT
         chk.check_class(tp, klass)
@@ -221,8 +221,6 @@ class TestMorpion(unittest.TestCase):
         _1 = self.jeu.actions[0]
         self.assertEqual(_val, _1,
                          "Expected {}, found {}".format(_1, _val))
-        
-        
         
 def suite(fname):
     """ permet de récupérer les tests à passer avec l'import dynamique """

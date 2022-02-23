@@ -64,7 +64,8 @@ class Morpion(Game):
         _msg += "Coup(s) joué(s) = {}, trait au joueur '{}'\n"
         if self.over():
             if self.win():
-                _msg += "Partie terminée, gagnant '{}'\n".format(self.winner)
+                pawn = self.PAWN[self.winner+1]
+                _msg += "Partie terminée, gagnant '{}'\n".format(pawn)
             else:
                 _msg += "Partie terminée, match nul\n"
 
@@ -395,8 +396,7 @@ class Morpion(Game):
     @property
     def winner(self):
         """ None it's either a draw or non ending game """
-        return (self.__winner if self.__winner is None
-                else self.PAWN[self.__winner+1])
+        return self.__winner 
 
     def win(self) -> bool:
         """ win is True iff there is a winner """
