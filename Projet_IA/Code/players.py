@@ -68,8 +68,8 @@ class MinMax(Player): #récursif
     for a_i in self.game.actions:   #pour chaque action à partir de la racine
       self.game.move(a_i)           #on essaie les actions possibles une par une
       v_i = self.__eval_min(pf-1)   #lancement chaîne min max (processus récurcif) 
-      if v_i > v_best:
-          v_best = v_i
+      if v_i > v_best: #mise à jour si une meilleur valeure est trouvée
+          v_best = v_i 
           a_best = a_i
       self.game.undo()              #je reviens à l'état précédent
     return a_best 
@@ -77,7 +77,7 @@ class MinMax(Player): #récursif
   # -----------------------------------------------
   def __eval_min(self, pf):
     """Cherche à minimiser les gains adverses. Utilisé sur les noeuds gérés par
-    l'adversaire"""
+    l'adversaire. Appelle __eval_max()"""
     v_min=[]
     #si on est au max de pf, ou sur une feuille : on s'arrête
     if pf == 0 or self.game.over() == True : return self.estimation() #p8 fiche aide
@@ -91,7 +91,8 @@ class MinMax(Player): #récursif
 
   # -----------------------------------------------
   def __eval_max(self,pf):
-    """Cherche à maximiser les gains du joueur"""
+    """Cherche à maximiser les gains du joueur. Utilisé sur les noeuds gérés par
+    le joueur. Appelle __eval_min()"""
     v_max=[]
     if pf == 0 or self.game.over() == True : return self.estimation()
     else:
