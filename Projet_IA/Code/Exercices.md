@@ -24,6 +24,8 @@ Tous les sommets pouvant être atteint, en partant de la racine par un chemin de
 
 ![image-20220223201803376](C:\Users\geeka\AppData\Roaming\Typora\typora-user-images\image-20220223201803376.png)
 
+Pour évaluer la valeur de $S_1$ : je pars du principe que mon adversaire n’est pas con, et donc qu’il va forcément choisir le truc qui va l’arranger le plus lui au prochain tour, c’est à dire le truc qui va le plus me faire suer, c’est à dire le coup qui minimise mes gains. Donc je sais qu’il va forcément choisir $S_6$ puisque, entre $S_4,\ S_5,\ S_6$ c’est $S_6$ qui lui rapportera le plus (ici $S_6$ vaut $20-1 = 19$ pour l’adversaire)
+
 ## Exercice 2
 
 1. Quelle est la décision à la racine?
@@ -31,7 +33,7 @@ Tous les sommets pouvant être atteint, en partant de la racine par un chemin de
    
 
 2. Donnez l’ordre de visite des sommets de l’arbre, l’ordre est obtenu par le premier accès au
-  cours du parcours en profondeur d’abord.
+    cours du parcours en profondeur d’abord.
 
 3. Quels sont les sommets qui peuvent modiﬁer la valeur de α ?
 
@@ -42,3 +44,4 @@ Tous les sommets pouvant être atteint, en partant de la racine par un chemin de
 6. Donnez la valeur ﬁnale renvoyée par les sommets visités de l’arbre sauf celles des feuilles,
 ainsi que les valeurs de α et β lorsqu’on accède pour la première fois au sommet et lorsqu’on
 quitte le sommet.
+
