@@ -229,9 +229,42 @@ class NegAlphaBeta(Player): #optionnel 2
       print("not my turn to play")
       return None
     # maintenant on peut travailler
+    pf = self.get_value('pf') #on récupère la profondeur
+    alpha = -101 #alpha et beta ne sont pas choisies par l'utilisateur
+    beta = 101  #  +- self.WIN +-1 (aide_jalon_02 p11)
+    liste_vi=[]
+    #--
+    for a_i in self.game.actions:   #pour chaque action
+      #--changement d'état
+      self.game.move(a_i)           #j'avance sur l'une des actions disponible
+      #--récupération informations
+      v_i = self.__coupe_alpha(pf-1, alpha, beta)   #on diminue d'abord la borne beta 
+      liste_vi.append(v_i)
+      #--retour à l'état précédent
+      self.game.undo()
+      #--traitement de l'information (sortie possible)
+    #--
+    maximum = liste_vi.index(max(liste_vi))
+    return self.game.actions[maximum]
   # -----------------------------------------------
   def __coupe_alpha(self, pf, alpha, beta):
-    pass
+    if pf == 0 or self.game.over() == True : return self.estimation()
+    i = 0
+    while i<len(self.game.actions) and alpha<beta:
+      self.game.move(self.game.actions[i])
+      if pf%2 == 0:
+        v_i = self.__coupe_alpha(pf-1, alpha, beta) #chaîne récursive
+        self.game.undo()
+        if v_i <= beta: return beta
+        beta = min(beta, v_i)
+        i = i+1
+      else :
+        v_i = - self.__coupe_alpha(pf-1, -beta, -alpha) #chaîne récursive
+        self.game.undo()
+        if v_i <= alpha: return alpha
+        beta = min(beta, v_i)
+        i = i+1
+    return beta
 #====================== exemples de code test ==========================#
 if __name__ == "__main__":
     #--tous les jeux disponibles pour les tests (pour les paramètres cf fichiers)
