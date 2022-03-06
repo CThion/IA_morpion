@@ -33,32 +33,26 @@ AlphaBeta renvoie la même chose que MinMax ==> décision à la racine est $S_2$
 
 ### 2) Donnez l’ordre de visite des sommets de l’arbre, l’ordre est obtenu par le premier accès au cours du parcours en profondeur d’abord.
 
-| Sommet | $\alpha$ | $\beta$                  |
-| ------ | -------- | ------------------------ |
-| S1     | -00      | +00                      |
-| S4     | -00      | +00                      |
-| S10    | -00      | +00                      |
-| S19    | -00      | +00                      |
-| S10    | -00      | 19                       |
-| S20    | -00      | 19                       |
-| S10    | -00      | 8                        |
-| S4     | 8        | +00                      |
-| S11    | 8        | 8                        |
-| S21    | 8        | 8                        |
-| S11    | 8        | -10 => erreur => garde 8 |
-|        |          |                          |
-|        |          |                          |
+Si on compte les feuilles dans le parcours on a :
 
+$$ S_1 \rightarrow S_4 \rightarrow S_{10} \rightarrow S_{19} \rightarrow S_{20} \rightarrow S_{11} \rightarrow S_{21} \rightarrow S_5 \rightarrow S_{12} \rightarrow S_{22} \rightarrow S_{23} \rightarrow S_{13} \rightarrow S_6 \\ \rightarrow S_2 \rightarrow S_7 \rightarrow S_{14} \rightarrow S_{24} \rightarrow S_{25} \rightarrow S_{15} \rightarrow S_{26} \\ \rightarrow S_3 \rightarrow S_{32}$$
 
+On doit avoir au maximum $2\sqrt{n}-1=2\sqrt{32}-1=10$
+
+VERIFICAITON RATÉE ==>  DEMANDER PROF POUR FORMULE
 
 ### 3) **Quels sont les sommets qui peuvent modiﬁer la valeur de α ?**
 
-Tous les sommets de profondeur paire.
+Tous les sommets de profondeur paire qui ne sont pas ignorés
 
 ### 4) **Quels sont les sommets qui peuvent modiﬁer la valeur de β ?**
 
-Tous les sommets de profondeur impaire
+Tous les sommets de profondeur impaire qui ne sont pas ignorés
 
 ### 5) **Y-a-t-il des sommets non visités par l’algorithme de l’alpha-beta?**
 
+Tous les sommets en dessous du nœud $S_8$ 
+
 ### 6)  Donnez la valeur ﬁnale renvoyée par les sommets visités de l’arbre sauf celles des feuilles, ainsi que les valeurs de α et β lorsqu’on accède pour la première fois au sommet et lorsqu’on  quitte le sommet.
+
+REFAIRE AU PROPRE GRAPHE GWENDAL
