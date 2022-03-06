@@ -31,7 +31,7 @@ class Human(Player):
           """)
     #--choix d'un coup par le joueur
     choice = input("Où voulez-vous jouer ? ")
-    while choice.isdecimal()==False or int(choice) not in range(1,len(self.game.actions)+1):  
+    while choice.isdecimal()==False or int(choice) not in range(0,len(self.game.actions)):  
       #--Tant que l'input n'est pas valide
       choice = input('Mauvais choix, réessayez. Où voulez-vous jouer ? : ') 
     return self.game.actions[int(choice)]
@@ -107,8 +107,8 @@ class AlphaBeta(Player):
   """
   Algorithme du MinMax optimisé en donnant des bornes alpha et beta, 
   qui réduisent le champ des possibles (Branch&Brant).
-  Alpha = borne sup
-  Beta = borne inf
+  Alpha = borne max(inf)
+  Beta = borne min(sup)
   """
   def decision(self, state):
     self.game.state = state # on met à jour l’état du jeu
@@ -160,9 +160,9 @@ class AlphaBeta(Player):
       i = i+1
     return alpha
 # -----------------------------------------------------------------------
-class NegaMax(Player):  #optionnel 1
+class Negamax(Player):  #optionnel 1
   """
-  Docstring à rajouter
+  Version améliorée de l'algorithme MinMax
   """
   def decision(self, state):
     self.game.state = state # on met à jour l’état du jeu
@@ -171,41 +171,52 @@ class NegaMax(Player):  #optionnel 1
       return None
     # maintenant on peut travailler
     pf = self.get_value('pf') #on récupère la profondeur
-    if pf == 0 :return random.choice(self.game.actions) #à demander au prof
-    liste_vi=[]
-    #--
-    for a_i in self.game.actions:   #pour chaque action
-      self.game.move(a_i)           #je prend l'une des actions disponible
-      v_i = self.__eval_negamax(pf-1)   #je minimise d'abord le gain adverse à la profondeur suivante 
-      liste_vi.append(v_i)
+    a_best = None #meilleur action trouvée
+    v_best = -1000 #valeur (poids) de a_best
+    #-- parcours arbre
+    for a_i in self.game.actions:   #pour chaque action à partir de la racine
+      self.game.move(a_i)           #on essaie les actions possibles une par une
+      v_i = self.__eval_negamax(pf-1)   #lancement chaîne min max (processus récurcif) 
+      if v_i > v_best: #mise à jour si une meilleur valeure est trouvée
+          v_best = v_i 
+          a_best = a_i
       self.game.undo()              #je reviens à l'état précédent
-    #--
-    maximum = liste_vi.index(max(liste_vi))
-    return self.game.actions[maximum] 
+    return a_best 
   # -----------------------------------------------
-  def __eval_negamax(self,pf):  #A reprendre
+  def __eval_negamax(self,pf):  
     """Objectif : regrouper eval_min et eval_max en 1 methode"""  #Pas d'utilisation de la propriété
     polarite = True                                               #donnée, essayer de l'implémenter
     if pf == 0 or self.game.over() == True : return self.estimation()
     else:
-      if polarite == True :
-        liste=[]
-        for actions in self.game.actions:
-          self.game.move(actions)
-          v_i = self.__eval_negamax(pf-1)
-          liste.append(v_i)
-          self.game.undo()
-        polarite = False
-        return min(liste)
-      else :
-        liste=[]
-        for actions in self.game.actions:
-          self.game.move(actions)
-          v_i = self.__eval_negamax(pf-1)
-          liste.append(v_i)
-          self.game.undo()
-        polarite = False
-        return max(liste)
+      liste=[]
+      for actions in self.game.actions:
+        self.game.move(actions)
+        v_i = self.__eval_negamax(pf-1)
+        liste.append(v_i)
+        self.game.undo()
+      polarite = (-1)** pf
+      return polarite * min([polarite * l for l in liste])
+
+        
+##      if polarite == True :
+##        liste=[]
+##        for actions in self.game.actions:
+##          self.game.move(actions)
+##          v_i = self.__eval_negamax(pf-1)
+##          liste.append(v_i)
+##          self.game.undo()
+##        if polarite == True :
+##          polarite = False
+##          return min(liste)
+##      else :
+##        liste=[]
+##        for actions in self.game.actions:
+##          self.game.move(actions)
+##          v_i = self.__eval_negamax(pf-1)
+##          liste.append(v_i)
+##          self.game.undo()
+##        polarite = True
+##        return max(liste)
   # -----------------------------------------------------------------------
 class NegAlphaBeta(Player): #optionnel 2
   """
