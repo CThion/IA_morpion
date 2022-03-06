@@ -130,7 +130,6 @@ class AlphaBeta(Player):
       #--retour à l'état précédent
       self.game.undo()
       #--traitement de l'information (sortie possible)
-      
     #--
     maximum = liste_vi.index(max(liste_vi))
     return self.game.actions[maximum] 
@@ -159,7 +158,7 @@ class AlphaBeta(Player):
       if v_i >= beta: return beta
       alpha = max(alpha, v_i)
       i = i+1
-    return beta
+    return alpha
 # -----------------------------------------------------------------------
 class NegaMax(Player):  #optionnel 1
   """
