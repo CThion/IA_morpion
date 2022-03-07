@@ -176,7 +176,7 @@ class Negamax(Player):  #optionnel 1
     #-- parcours arbre
     for a_i in self.game.actions:   #pour chaque action à partir de la racine
       self.game.move(a_i)           #on essaie les actions possibles une par une
-      v_i = self.__eval_negamax(pf-1)   #lancement chaîne min max (processus récurcif) 
+      v_i = -self.__eval_negamax(pf-1)   #lancement chaîne min max (processus récurcif) 
       if v_i > v_best: #mise à jour si une meilleur valeure est trouvée
           v_best = v_i 
           a_best = a_i
@@ -185,16 +185,28 @@ class Negamax(Player):  #optionnel 1
   # -----------------------------------------------
   def __eval_negamax(self,pf):  
     """Objectif : regrouper eval_min et eval_max en 1 methode"""  #Pas d'utilisation de la propriété
-    if pf == 0 or self.game.over() == True : return self.estimation()
+    if pf == 0 or self.game.over() == True:
+      if self.who_am_i == self.game.turn : return self.estimation()
+      else : return -self.estimation()
     else:
-      liste=[]
+      liste =[]
       for actions in self.game.actions:
         self.game.move(actions)
-        v_i = self.__eval_negamax(pf-1)
+        v_i = -self.__eval_negamax(pf-1)
         liste.append(v_i)
         self.game.undo()
-      polarite = (-1)** pf
-      return polarite * min([polarite * l for l in liste])
+      return max(liste)
+    
+##    if pf == 0 or self.game.over() == True : return self.estimation()
+##    else:
+##      liste=[]
+##      for actions in self.game.actions:
+##        self.game.move(actions)
+##        v_i = self.__eval_negamax(pf-1)
+##        liste.append(v_i)
+##        self.game.undo()
+##      polarite = (-1)** pf
+##      return polarite * min([polarite * l for l in liste])
 
         
 ##      if polarite == True :
