@@ -8,8 +8,8 @@ A tour de rôle
 un joueur retire de 1 à 3 allumettes
 
 2 formes de jeu
-A: le perdant est celui qui prend la dernière allumette [True]
-B: le gagnant est celui qui prend la dernière allumette [False]
+A: le gagnant est celui qui prend la dernière allumette [True]
+B: le perdant est celui qui prend la dernière allumette [False]
 """
 
 from classes.abstract_game import Game
@@ -24,7 +24,7 @@ class Matches(Game):
         """
         self.__board = max(min(25, allumettes), 1), bool(prendre)
         self.__init_board = self.__board[:]
-        super().__init__(*self.__init_board)
+        super().__init__(self.__init_board[0], prendre=self.__init_board[1])
 
     def reset(self):
         super().reset()
@@ -57,7 +57,7 @@ class Matches(Game):
     def winner(self):
         """ defines the winner """
         if self.over():
-            return self.turn if not self.board[1] else self.opponent
+            return self.opponent if self.board[1] else self.turn
         return None
 
     def over(self) -> bool:

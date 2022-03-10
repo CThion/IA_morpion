@@ -5,16 +5,19 @@
 require a 'jeu' with specific attributes
 allow extra named parameters accessible by get_value(name_parameter)
 provides:
+WIN the score for a win (-WIN score for a loss)
 read-only 'name' and 'game'
 read-write 'who_am_i'
 an abstract 'decision' method to be redefined in subclasses
 a simple 'estimation' method that might be redefined in subclasses
 estimation is made wrt to the root player 
-> root_estimation for minmax / alphabeta
-> turn_estimation for negamax approaches
+> estimation() for minmax / alphabeta
+> simulation(n) return counters win, loss, draw
 """
 
 from typing import Iterable
+from numbers import Number
+import random
 
 class Player:
     """ classe abstraite d'où dériveront tous les joueurs """
@@ -39,7 +42,7 @@ class Player:
 
         self.__name = str(nom).strip()
         jeu.reset()
-        self.__game = jeu 
+        self.__game = jeu.clone()
         self.__who = None
         self.__idnum = self.ID+1
         Player.ID += 1
@@ -82,7 +85,7 @@ class Player:
         """ given some state, provides one authorized action """
         raise NotImplementedError("decision is undefined")
 
-    def estimation(self):
+    def estimation(self) -> Number:
         """ a 3 states simple estimation for root's player
         require WIN > 0
         require WIN = - LOSS
@@ -94,3 +97,23 @@ class Player:
         else: _e = - self.WIN
         return _e
 
+    def simulation(self, n:int=10) -> list:
+        """ run n games 
+            count the win/loss/draw for root's player 
+            require n > 0
+        """
+        _count = [0,0,0] # win, loss, draw
+        for _ in range(n):
+            _nbMoves = 0
+            while not self.game.over():
+                _a = random.choice(self.game.actions)
+                self.game.move(_a)
+                _nbMoves += 1
+            if self.game.winner is None: _i = -1
+            elif self.game.winner == self.who_am_i: _i = 0
+            else: _i = 1
+            _count[_i] += 1
+            for _ in range(_nbMoves): self.game.undo()
+        return _count[:]
+
+            

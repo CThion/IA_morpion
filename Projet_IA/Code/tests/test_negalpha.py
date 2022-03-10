@@ -5,7 +5,7 @@
 __author__ = "mmc <marc-michel dot corsini at u-bordeaux dot fr>"
 __date__ = "19.02.21"
 __usage__ = "Project 2022: tests jalon 02: NegAlphaBeta"
-__update__ = "22.02.22"
+__update__ = "24.02.22"
 
 import os
 import unittest
@@ -102,37 +102,40 @@ class TestMatches(unittest.TestCase):
     @patch('builtins.print')    
     def test_take_last(self, mock_prn):
         """ take the last match """
-        self.jeu = A(13, True) # prendre la derniere
-        self.o = self.K('x', self.jeu, pf=3)
-        self.o.who_am_i = self.jeu.turn
-        _0 = self.o.decision( (3,4) )
+        jeu = A(13, True) # prendre la derniere
+        o = self.K('x', jeu, pf=3)
+        _jeu = o.game
+        o.who_am_i = jeu.turn
+        _0 = o.decision( (3,4) )
         self.assertEqual(_0, 3, "expected 3 found {}".format(_0))
-        _1 = self.o.decision( (5,4) )
+        _1 = o.decision( (5,4) )
         self.assertEqual(_1, 1, "expected 1 found {}".format(_1))
-        _2 = self.o.decision( (6,4) )
+        _2 = o.decision( (6,4) )
         self.assertEqual(_2, 2, "expected 2 found {}".format(_2))
+        self.assertFalse(jeu.state == _jeu.state, "expect different values")
 
     @patch('builtins.print')    
     def test_leave_last(self, mock_prn):
         """ dont take the last match """
-        self.jeu = A(13, False) # ne pas prendre la derniere
-        self.o = self.K('x', self.jeu, pf=3)
-        self.o.who_am_i = self.jeu.turn
-        _0 = self.o.decision( (3,4) )
+        jeu = A(13, False) # ne pas prendre la derniere
+        o = self.K('x', jeu, pf=3)
+        o.who_am_i = jeu.turn
+        _0 = o.decision( (3,4) )
         self.assertEqual(_0, 2, "expected 2 found {}".format(_0))
-        _1 = self.o.decision( (5,4) )
+        _1 = o.decision( (5,4) )
         self.assertEqual(_1, 1, "expected 1 found {}".format(_1))
-        _2 = self.o.decision( (6,4) )
-        self.assertEqual(_1, 1, "expected 1 found {}".format(_2))
+        _2 = o.decision( (6,4) )
+        self.assertEqual(_2, 1, "expected 1 found {}".format(_2))
         
 class TestBoxes(unittest.TestCase):
     """ find the best action for boxes """
     def setUp(self):
         chk.check_class(tp, THAT)
-        self.jeu = B(7,17)
+        jeu = B(7,17)
         self.K = getattr(tp, THAT)
-        self.o = self.K('x', self.jeu, pf=3)
-        self.o.who_am_i = self.jeu.turn
+        self.o = self.K('x', jeu, pf=3)
+        self.o.who_am_i = jeu.turn
+        self.jeu = self.o.game
 
     @patch('builtins.print')    
     def test_split(self, mock_prn):
@@ -144,12 +147,12 @@ class TestBoxes(unittest.TestCase):
 
 
 class TestHexaPawn(unittest.TestCase):
-    """ do we find the best move HexaPawn """
+    """ do we find the best move for HexaPawn """
     def setUp(self):
         klass = THAT
         chk.check_class(tp, klass)
-        self.jeu = Hexapawn() # à définir
         self.K = getattr(tp, klass)
+        self.jeu = Hexapawn() # à définir
 
     @patch('builtins.print')    
     def test_attak(self, mock_prn):
@@ -158,13 +161,13 @@ class TestHexaPawn(unittest.TestCase):
         _rep = []
         _0 = "X.."+"O.X"+".O.",4
         for pf in pfl:
-            self.o = self.K('bidon', self.jeu, pf=pf)
-            self.o.who_am_i = self.jeu.turn
-            _rep.append(self.o.decision(_0))
+            o = self.K('bidon', self.jeu, pf=pf)
+            o.who_am_i = self.jeu.turn
+            _rep.append(o.decision(_0))
         _val = [_rep[0] == x for x in _rep ]
         self.assertTrue(all(_val),
                         "expected the same answer {}".format(_rep))
-        _1 = self.jeu.actions[0]
+        _1 = o.game.actions[0]
         self.assertEqual(_rep[0], _1,
                          "expected {}, found {}".format(_1, _rep[0]))
         
@@ -183,13 +186,14 @@ class TestMorpion(unittest.TestCase):
         _rep = []
         _0 = '.'*5+"..XO."*3+'.'*5, 6
         for pf in pfl:
-            self.o = self.K('bidon', self.jeu, pf=pf)
-            self.o.who_am_i = self.jeu.turn
-            _rep.append(self.o.decision(_0))
+            o = self.K('bidon', self.jeu, pf=pf)
+            o.who_am_i = self.jeu.turn
+            jeu = o.game
+            _rep.append(o.decision(_0))
         _val = [_rep[0] == x for x in _rep ]
         self.assertTrue(all(_val),
                         "expected the same answer {}".format(_rep[0]))
-        _1 = self.jeu.actions[2]
+        _1 = jeu.actions[2]
         self.assertEqual(_rep[0], _1,
                          "expected {}, found {}".format(_1, _rep[0]))
 
@@ -200,14 +204,14 @@ class TestMorpion(unittest.TestCase):
         _0 = "X..O."+"."*5+"..XO."*2+'.'*5, 6
         _rep = []
         for pf in pfl:
-            self.o = self.K('bidon', self.jeu, pf=pf)
-            self.o.who_am_i = self.jeu.turn
-            _rep.append(self.o.decision(_0))
-            _rep.append(self.o.decision(self.jeu.state))
+            o = self.K('bidon', self.jeu, pf=pf)
+            o.who_am_i = self.jeu.turn
+            jeu = o.game
+            _rep.append(o.decision(_0))
         _val = [_rep[0] == x for x in _rep ]
         self.assertTrue(all(_val),
                         "expected the same answer {}".format(_rep[0]))
-        _1 = self.jeu.actions[6]
+        _1 = jeu.actions[6]
         self.assertEqual(_rep[0], _1,
                          "expected {}, found {}".format(_1, _rep[0]))
 
@@ -215,10 +219,10 @@ class TestMorpion(unittest.TestCase):
     def test_blind_spot(self, mock_prn):
         """ cant find the right answer at depth 1 """
         _0 = "X..O."+"."*5+"..XO."*2+'.'*5, 6
-        self.o = self.K('bidon', self.jeu, pf=1)
-        self.o.who_am_i = self.jeu.turn
-        _val = self.o.decision(_0)
-        _1 = self.jeu.actions[0]
+        o = self.K('bidon', self.jeu, pf=1)
+        o.who_am_i = self.jeu.turn
+        _val = o.decision(_0)
+        _1 = o.game.actions[0]
         self.assertEqual(_val, _1,
                          "Expected {}, found {}".format(_1, _val))
         

@@ -11,7 +11,6 @@ except:
     except:
         print("missing ezCLI and tools.ezCLI")
 
-
 def count(func):
     """ count the recursive calls """
     @functools.wraps(func)

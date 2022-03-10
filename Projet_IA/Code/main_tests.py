@@ -28,41 +28,55 @@ try:
     from tests import test_randy
 except Exception as _e:
     print("failed test_randy")
+    from tests import __init__ as test_randy
     pass
 try:
     from tests import test_human
 except Exception as _e:
     print("failed test_human")
+    from tests import __init__ as test_human
     pass
 try:
     from tests import test_minmax
 except Exception as _e:
     print("failed test_minmax")
+    from tests import __init__ as test_minimax
     pass
 try:
     from tests import test_negamax
 except Exception as _e:
     print("failed test_negamax")
+    from tests import __init__ as test_negamax
     pass
 try:
     from tests import test_alphabeta
 except Exception as _e:
     print("failed test_alphabeta")
+    from tests import __init__ as test_alphabeta
     pass
 try:
     from tests import test_negalpha
 except Exception as _e:
     print("failed test_negalpha")
+    from tests import __init__ as test_negalpha
     pass
 try:
     from tests import test_negalpha_mem
 except Exception as _e:
     print("failed test_negalpha_mem")
+    from tests import __init__ as test_negalpha_mem
+    pass
+try:
+    from tests import test_negalpha_memH
+except Exception as _e:
+    print("failed test_negalpha_mem")
+    from tests import __init__ as test_negalpha_memH
     pass
 try:
     from tests import test_iterative
 except Exception as _e:
     print("failed test_iterative")
+    from tests import __init__ as test_iterative
     pass
 try:
     from tests import test_randy_mc
@@ -73,16 +87,25 @@ try:
     from tests import test_ucb
 except Exception as _e:
     print("failed test_ucb")
+    from tests import __init__ as test_ucb
     pass
 try:
     from tests import test_uct
 except Exception as _e:
     print("failed test_uct")
+    from tests import __init__ as test_uct
     pass
 try:
     from tests import test_negalpha_mc
 except Exception as _e:
     print("failed test_negalpha_mc")
+    from tests import __init__ as test_negalpha_mc
+    pass
+try:
+    from tests import test_negalpha_mem_mc
+except Exception as _e:
+    print("failed test_negalpha_mem_mc")
+    from tests import __init__ as test_negalpha_mem_mc
     pass
 #================================ unittest area ========================#
 def suite_me(fname, toTest):
@@ -126,11 +149,12 @@ if __name__ == '__main__':
                  '2': ("randy human minmax negamax alphabeta alphabeta_negamax",
                        [test_randy, test_human, test_minmax,
                         test_negamax, test_alphabeta, test_negalpha]),
-                 '3':("alphabeta_memory iterative_deepening randy_mc ucb uct"
-                      " negamax_mc",
-                      [])
-                      #[test_negalpha_mem, test_iterative, test_randy_mc,
-                      # test_ucb, test_uct, test_negalpha_mc])
+                 '3':("alphabeta_memory_standard alphabeta_memory_heuristique"
+                      " iterative_deepening"
+                      " randy_mc negamax_mc negamax_mem_mc ucb uct",
+                      [test_negalpha_mem, test_negalpha_memH, test_iterative,
+                       test_randy_mc, test_negalpha_mc, test_negalpha_mem_mc,
+                       test_ucb, test_uct])
                       }
     _all = None
     print("select wich subtests you want")

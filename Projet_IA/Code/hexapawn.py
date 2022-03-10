@@ -171,7 +171,6 @@ class Hexapawn(Game):
             self.add_history( _data )
             if a in (0, self.get_parameter('nbl')-1):
                 self.__winner = self.turn
-                print("winner is found", flush=True)
             self.__board[a][b] = self.__board[x][y]
             self.__board[x][y] = self.PAWN[0]
             self.timer += 1

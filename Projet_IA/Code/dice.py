@@ -35,18 +35,22 @@ from typing import Sized
 import random
 
 class Dice(Game):
-    def __init__(self, cpt:int, random_state:int=42):
+    def __init__(self, cpt:int,
+                 dice:int=0, label:bool=True, random_state:int=42):
         """
            cpt: initialisation du compteur
+           dice: upper face, might be random if not allowed
+           label: internal flag for str
            random_state: initialisation de la graine
         """
         random.seed(random_state)
         if not isinstance(cpt, int) : cpt = random.choice(range(7, 101))
         else: cpt = max(7, min(100, cpt))
-        dice = random.choice(range(1, 7))
+        dice = random.choice(range(1, 7)) if dice not in range(1,7) else dice
         self.__board = cpt, dice
         self.__init_board = self.__board[:]
-        super().__init__(*self.__init_board)
+        super().__init__(cpt, dice=dice,
+                         label=True, random_state=random_state)
 
     def reset(self):
         super().reset()

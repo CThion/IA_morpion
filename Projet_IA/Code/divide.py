@@ -64,7 +64,7 @@ class Divide(Game):
         if _timer == 1:
             a,b = self.__init_board
             return sum(_boxes) == a or sum(_boxes) == b
-        return sum(_boxes) <= self.__init_board[1] - _timer
+        return sum(_boxes) <= max(self.__init_board) - _timer + 1
     
     @property
     def actions(self) -> tuple:

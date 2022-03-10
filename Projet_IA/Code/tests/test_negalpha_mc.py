@@ -4,30 +4,31 @@
 
 __author__ = "mmc <marc-michel dot corsini at u-bordeaux dot fr>"
 __date__ = "19.02.21"
-__usage__ = "Project 2022: tests jalon 02: AlphaBeta"
-__update__ = "24.02.22"
+__usage__ = "Project 2022: tests jalon 03: NegAlphaBeta_MC"
+__update__ = "07.03.22"
 
 import os
 import unittest
 from unittest.mock import patch
 from  tools import checkTools as chk
-from allumettes import Matches as A
-from divide_left import Divide as B
+from allumettes import Matches
+from divide_left import Divide
+from dice import Dice
 from hexapawn import Hexapawn
 from morpion import Morpion
 
 
 ###
-THAT="AlphaBeta"
+THAT="NegAlphaBeta_MC"
 
 def mock_prn(*args, **kargs):
     """ no output allowed """
     pass
 
 class TestKlass(unittest.TestCase):
-    """ Is 'AlphaBeta' correctly setup """
+    """ Is 'THAT' correctly setup """
     def test_sub(self):
-        """ AlphaBeta is a Player """
+        """ NegAlphaBeta is a Player """
         klass = THAT
         player = "Player"
         chk.check_class(tp, player)
@@ -71,12 +72,12 @@ class TestPrivacy(unittest.TestCase):
                          "".format(_latt_slots))
         
 class TestDefault(unittest.TestCase):
-    """ check the correct default behavior of 'AlphaBeta' """
+    """ check the correct default behavior of 'NegAlphaBeta' """
     def setUp(self):
         chk.check_class(tp, THAT)
-        self.jeu = A(17)
+        self.jeu = Matches(17)
         self.K = getattr(tp, THAT)
-        self.o = self.K('x', self.jeu, pf=3)
+        self.o = self.K('x', self.jeu, pf=3, nbSim=0)
 
     @patch('builtins.print')
     def test_None_decision_init(self, mock_prn):
@@ -102,8 +103,8 @@ class TestMatches(unittest.TestCase):
     @patch('builtins.print')    
     def test_take_last(self, mock_prn):
         """ take the last match """
-        jeu = A(13, True) # prendre la derniere
-        o = self.K('x', jeu, pf=3)
+        jeu = Matches(13, True) # prendre la derniere
+        o = self.K('x', jeu, pf=3, nbSim=0)
         _jeu = o.game
         o.who_am_i = jeu.turn
         _0 = o.decision( (3,4) )
@@ -117,8 +118,8 @@ class TestMatches(unittest.TestCase):
     @patch('builtins.print')    
     def test_leave_last(self, mock_prn):
         """ dont take the last match """
-        jeu = A(13, False) # ne pas prendre la derniere
-        o = self.K('x', jeu, pf=3)
+        jeu = Matches(13, False) # ne pas prendre la derniere
+        o = self.K('x', jeu, pf=3, nbSim=0)
         o.who_am_i = jeu.turn
         _0 = o.decision( (3,4) )
         self.assertEqual(_0, 2, "expected 2 found {}".format(_0))
@@ -131,9 +132,9 @@ class TestBoxes(unittest.TestCase):
     """ find the best action for boxes """
     def setUp(self):
         chk.check_class(tp, THAT)
-        jeu = B(7,17)
+        jeu = Divide(7,17)
         self.K = getattr(tp, THAT)
-        self.o = self.K('x', jeu, pf=3)
+        self.o = self.K('x', jeu, pf=3, nbSim=0)
         self.o.who_am_i = jeu.turn
         self.jeu = self.o.game
 
@@ -161,7 +162,7 @@ class TestHexaPawn(unittest.TestCase):
         _rep = []
         _0 = "X.."+"O.X"+".O.",4
         for pf in pfl:
-            o = self.K('bidon', self.jeu, pf=pf)
+            o = self.K('bidon', self.jeu, pf=pf, nbSim=0)
             o.who_am_i = self.jeu.turn
             _rep.append(o.decision(_0))
         _val = [_rep[0] == x for x in _rep ]
@@ -186,7 +187,7 @@ class TestMorpion(unittest.TestCase):
         _rep = []
         _0 = '.'*5+"..XO."*3+'.'*5, 6
         for pf in pfl:
-            o = self.K('bidon', self.jeu, pf=pf)
+            o = self.K('bidon', self.jeu, pf=pf, nbSim=0)
             o.who_am_i = self.jeu.turn
             jeu = o.game
             _rep.append(o.decision(_0))
@@ -204,7 +205,7 @@ class TestMorpion(unittest.TestCase):
         _0 = "X..O."+"."*5+"..XO."*2+'.'*5, 6
         _rep = []
         for pf in pfl:
-            o = self.K('bidon', self.jeu, pf=pf)
+            o = self.K('bidon', self.jeu, pf=pf, nbSim=0)
             o.who_am_i = self.jeu.turn
             jeu = o.game
             _rep.append(o.decision(_0))
@@ -219,18 +220,130 @@ class TestMorpion(unittest.TestCase):
     def test_blind_spot(self, mock_prn):
         """ cant find the right answer at depth 1 """
         _0 = "X..O."+"."*5+"..XO."*2+'.'*5, 6
-        o = self.K('bidon', self.jeu, pf=1)
+        o = self.K('bidon', self.jeu, pf=1, nbSim=0)
         o.who_am_i = self.jeu.turn
         _val = o.decision(_0)
         _1 = o.game.actions[0]
         self.assertEqual(_val, _1,
                          "Expected {}, found {}".format(_1, _val))
+
+#========================== MC part ===============================#
+class TestAnswersMatches(unittest.TestCase):
+    """ check that 'THAT' can find good answers in some cases """
+    def setUp(self):
+        chk.check_class(tp, THAT)
+        self.K = getattr(tp, THAT)
+        self.jeu = Matches(7, False)
+        self.sims = (10, 50, 100)
+
+    @patch('builtins.print')
+    def test_decision(self, mock_prn):
+        """ decision for game Matches """
+        for _ in self.sims:
+            with self.subTest(nbSim=_):
+                o = self.K('x', self.jeu, pf=1, nbSim=_)
+                o.who_am_i = self.jeu.turn # 1st player
+                for nbm in range(2, 5):
+                    _choice = o.decision( (nbm, 2) )
+                    self.assertTrue(_choice == nbm-1,
+                                    "with {} expecting {} found {}"
+                                    "".format(nbm, nbm-1, _choice))
+
+    @patch('builtins.print')
+    def test_bad_decision(self, mock_prn):
+        """ decision for game Matches should fail when no sims allowed """
+        o = self.K('x', self.jeu, pf=1, nbSim=0)
+        o.who_am_i = self.jeu.turn # 1st player
+        for nbm in range(2, 5):
+            _choice = o.decision( (nbm, 2) )
+            self.assertTrue(_choice == 1,
+                            "with {} expecting {} found {}"
+                            "".format(nbm, 1, _choice))
+                    
+class TestAnswersDice(unittest.TestCase):
+    """ check that 'THAT' can find good answers in some cases """
+    def setUp(self):
+        chk.check_class(tp, THAT)
+        self.K = getattr(tp, THAT)
+        self.sims = (10, 50, 100)
+        self.jeu = Dice(8,6)
+        
+    @patch('builtins.print')
+    def test_decision(self, mock_prn):
+        """ decision for game Dice """
+        for _ in self.sims:
+            o = self.K('x', self.jeu, pf=1, nbSim=_)
+            o.who_am_i = self.jeu.turn # 1st player
+            with self.subTest(nbSim=_):
+                for nbm in range(2, 6):
+                    with self.subTest(cpt=nbm):
+                        _choice = o.decision( ((nbm,6),2) )
+                        self.assertTrue(_choice == nbm,
+                                        "expecting {} found {}"
+                                        "".format(nbm, _choice))
+    @patch('builtins.print')
+    def test_bad_decision(self, mock_prn):
+        """ decision for game Dice with no Sim allowed """
+        o = self.K('x', self.jeu, pf=1, nbSim=0)
+        o.who_am_i = self.jeu.turn # 1st player
+        for nbm in range(2, 6):
+            with self.subTest(cpt=nbm):
+                _choice = o.decision( ((nbm,6),2) )
+                self.assertTrue(_choice == 2,
+                                "expecting {} found {}"
+                                "".format(2, _choice))
+
+class TestAnswersBoxes(unittest.TestCase):
+    """ find the best action for boxes """
+    def setUp(self):
+        chk.check_class(tp, THAT)
+        self.K = getattr(tp, THAT)
+        self.sims = (10, 50, 100)
+
+    @patch('builtins.print')    
+    def test_split(self, mock_prn):
+        """ force next move to a win Divide """
+        jeu = Divide(7,17)
+        _s = (3,4), 4
+        for _ in self.sims:
+            with self.subTest(nbSim=_):
+                o = self.K('x', jeu, pf=1, nbSim=_)
+                o.who_am_i = jeu.turn
+                _0 = o.decision(_s)
+                self.assertEqual(_0, o.game.actions[0],
+                                 "wrong choice {} expect {}"
+                                 "".format(_0, o.game.actions[0]))
+                        
+class TestAnswersTTT(unittest.TestCase):
+    """ check that 'THAT' can find good answers in some cases """
+    def setUp(self):
+        chk.check_class(tp, THAT)
+        self.K = getattr(tp, THAT)
+        self.jeu = Morpion()
+        self.sims = (10, 50, 100)
+
+    @patch('builtins.print')
+    def test_defence(self, mock_prn):
+        """ decision for game TicTacToe """
+        for _ in self.sims:
+            with self.subTest(nbSim=_):
+                o = self.K('x', self.jeu, pf=1, nbSim=_)
+                o.who_am_i = self.jeu.turn # 1st player
+                _state = "XOX.OX..O",6
+                _choice = o.decision( _state )
+                _1 = o.game.actions[-1]
+                self.assertTrue(_choice == _1,
+                                "expecting {} found {}"
+                                "".format(_1, _choice))
+
         
 def suite(fname):
     """ permet de récupérer les tests à passer avec l'import dynamique """
     global tp
     klasses = (TestPrivacy, TestKlass, TestDefault,
-               TestMatches, TestBoxes, TestHexaPawn, TestMorpion)
+               TestMatches, TestBoxes, TestHexaPawn, TestMorpion,
+               TestAnswersMatches, TestAnswersBoxes, TestAnswersDice,
+               TestAnswersTTT)
     
     try:
         tp = __import__(fname)

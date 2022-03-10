@@ -129,9 +129,9 @@ class TestBehaviorA(unittest.TestCase):
     """ check the correct default behavior of 'THAT' """
     def setUp(self):
         chk.check_class(tp, THAT)
-        self.jeu = A(13)
         self.K = getattr(tp, THAT)
-        self.o = self.K('x', self.jeu)
+        self.o = self.K('x', A(13))
+        self.jeu = self.o.game
 
     def test_decision_output(self):
         """ given an answer is it ok """
@@ -148,9 +148,10 @@ class TestBehaviorB(unittest.TestCase):
     """ check the correct default behavior of 'THAT' """
     def setUp(self):
         chk.check_class(tp, THAT)
-        self.jeu = B(7, 17)
+        jeu = B(7, 17)
         self.K = getattr(tp, THAT)
-        self.o = self.K('x', self.jeu)
+        self.o = self.K('x', jeu)
+        self.jeu = self.o.game
 
     def test_decision_output(self):
         """ given an answer is it ok """
