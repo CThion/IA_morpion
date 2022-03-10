@@ -229,23 +229,16 @@ class NegAlphaBeta(Player): #optionnel 2
   def __coupe_alpha(self, pf, alpha, beta):
     """MIN cherche a diminuer beta"""
     if pf == 0 or self.game.over() == True :
-      if self.who_am_i == self.game.turn : return self.estimation()
-      else : return -self.estimation()
+      if self.who_am_i == self.game.turn : return -self.estimation()
+      else : return self.estimation()
     i = 0
     while i<len(self.game.actions) and alpha<beta:
       self.game.move(self.game.actions[i])
-      if self.who_am_i == self.game.turn :
-        v_i = self.__coupe_alpha(pf-1, alpha, beta) #chaîne récursive
-        self.game.undo()
-        if v_i <= alpha: return alpha
-        beta = min(beta, v_i)
-        i = i+1
-      else:
-        v_i = -self.__coupe_alpha(pf-1, -beta,-alpha) #chaîne récursive
-        self.game.undo()
-        if v_i <= alpha: return alpha
-        beta = min(beta, v_i)
-        i = i+1
+      v_i = -self.__coupe_alpha(pf-1, -beta,-alpha) #chaîne récursive
+      self.game.undo()
+      if v_i <= alpha: return alpha
+      beta = min(beta, v_i)
+      i = i+1
     return beta
 
   
