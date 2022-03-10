@@ -148,7 +148,7 @@ class AlphaBeta(Player):
     return beta
   # -----------------------------------------------
   def __coupe_beta(self, pf, alpha, beta):
-    """MIN cherche a diminuer beta"""
+    """MAX cherche a augmenter alpha"""
     if pf == 0 or self.game.over() == True : return self.estimation()
     i = 0
     while i<len(self.game.actions) and alpha<beta:
