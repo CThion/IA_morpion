@@ -241,27 +241,6 @@ class NegAlphaBeta(Player): #optionnel 2
       i = i+1
     return beta
 
-  
-##  def __coupe_alpha(self, pf, alpha, beta):
-##    """MIN cherche a diminuer beta"""
-##    if pf == 0 or self.game.over() == True : return self.estimation()
-##    i = 0
-##    teta=[alpha, beta]
-##    while i<len(self.game.actions) and alpha<beta:
-##      alpha=teta[0]; beta=teta[1]
-##      self.game.move(self.game.actions[i])
-##      p = (-1)**pf
-##      #v_i = polarite*self.__coupe_beta(pf-1, polarite*alpha, polarite*beta) #chaîne récursive
-##      v_i = p*self.__coupe_alpha(pf-1, p*teta[(-1+pf%2)**2], p*teta[pf%2]) #chaîne récursive
-##      self.game.undo()
-##      if pf%2==0: #profondeur pair => max
-##        if v_i <= alpha: return alpha #si en dessous de l'intervalle
-##        teta[0] = max(alpha, v_i)
-##      else:#profondeur impaire => min
-##        if v_i >= beta: return beta #si au dessus de l'intervalle
-##        teta[1] = min(beta, v_i)
-##      i = i+1
-##    return beta
 #====================== exemples de code test ==========================#
 if __name__ == "__main__":
     #--tous les jeux disponibles pour les tests (pour les paramètres cf fichiers)
