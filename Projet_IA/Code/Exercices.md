@@ -2,11 +2,11 @@
 
 ## Exercice 1
 
-### 1)  Quel est la décision à la racine
+### 1)  Quelle est la décision à la racine
 
 Décision à la racine : Sommet B, car il a le plus grand poids des trois.
 
-### 2) Donnez les valeurs des 3 sommets successeurs de la racine qui justiﬁe cette décision.
+### 2) Donnez les valeurs des 3 sommets successeurs de la racine qui justiﬁent cette décision.
 
 - $S_1$ : 1
 - $S_2$ : 5
