@@ -49,7 +49,7 @@ class NegAlphaBeta_Memory(Player): #optionnel 2
       #--traitement de l'information (sortie possible)
     #--
     maximum = liste_vi.index(max(liste_vi))
-    decision.memory.update({self.game.hash_code : {'pf':pf, "exact":True, "score":maximum, "best_action":self.game.actions[maximum]}}) #dico
+    self.decision.memory.update({self.game.hash_code : {'pf':pf, "exact":True, "score":maximum, "best_action":self.game.actions[maximum]}}) #dico
     return self.game.actions[maximum]
   # -----------------Partie Dictionnaire-----------
   decision.memory = {}
@@ -60,18 +60,18 @@ class NegAlphaBeta_Memory(Player): #optionnel 2
       
       if self.game.over() == True:  #dans ce if, exact vaut True car on a fini la partie
         if self.who_am_i == self.game.turn :
-          decision.memory.update({self.game.hash_code : {'pf':pf, "exact":True, "score":-self.estimation(), "best_action":None}}) #dico
+          self.decision.memory.update({self.game.hash_code : {'pf':pf, "exact":True, "score":-self.estimation(), "best_action":None}}) #dico
           return -self.estimation()
         else:
-          decision.memory.update({self.game.hash_code : {'pf':pf, "exact":True, "score":self.estimation(), "best_action":None}}) #dico
+          self.decision.memory.update({self.game.hash_code : {'pf':pf, "exact":True, "score":self.estimation(), "best_action":None}}) #dico
           return self.estimation()
 
       else: #dans ce else, la partie n'est pas finie, on n'a qu'une approximation donc exact vaut False
         if self.who_am_i == self.game.turn :
-          decision.memory.update({self.game.hash_code:{'pf':pf, "exact":False, "score":-self.estimation(), "best_action":None}}) #dico
+          self.decision.memory.update({self.game.hash_code:{'pf':pf, "exact":False, "score":-self.estimation(), "best_action":None}}) #dico
           return -self.estimation()
         else:
-          decision.memory.update({self.game.hash_code:{'pf':pf, "exact":False, "score":self.estimation(), "best_action":None}}) #dico
+          self.decision.memory.update({self.game.hash_code:{'pf':pf, "exact":False, "score":self.estimation(), "best_action":None}}) #dico
           return self.estimation()
 
     i = 0
@@ -80,22 +80,22 @@ class NegAlphaBeta_Memory(Player): #optionnel 2
       v_i = -self.__coupe_alpha(pf-1, -beta,-alpha) 
       
       if v_i <= alpha:
-        if decision.memory[self.game.hash_code]["exact"]==True:
+        if self.decision.memory[self.game.hash_code]["exact"]==True:
           self.game.undo()
-          decision.memory.update({self.game.hash_code:{'pf':pf, "exact":True, "score":alpha, "best_action":None}}) #dico
+          self.decision.memory.update({self.game.hash_code:{'pf':pf, "exact":True, "score":alpha, "best_action":None}}) #dico
           return alpha
         else:
           self.game.undo()
-          decision.memory.update({self.game.hash_code:{'pf':pf, "exact":False, "score":alpha, "best_action":None}}) #dico
+          self.decision.memory.update({self.game.hash_code:{'pf':pf, "exact":False, "score":alpha, "best_action":None}}) #dico
         return alpha
       beta = min(beta, v_i)
       i = i+1
-      if decision.memory[self.game.hash_code]["exact"]==True:
+      if self.decision.memory[self.game.hash_code]["exact"]==True:
         self.game.undo()
-        decision.memory.update({self.game.hash_code:{'pf':pf, "exact":True, "score":beta, "best_action":None}}) #dico
+        self.decision.memory.update({self.game.hash_code:{'pf':pf, "exact":True, "score":beta, "best_action":None}}) #dico
       else:
         self.game.undo()
-        decision.memory.update({self.game.hash_code:{'pf':pf, "exact":False, "score":beta, "best_action":None}}) #dico
+        self.decision.memory.update({self.game.hash_code:{'pf':pf, "exact":False, "score":beta, "best_action":None}}) #dico
     return beta
     
 #====================== exemples de code test ==========================#
