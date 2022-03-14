@@ -40,14 +40,23 @@ class NegAlphaBeta_Memory(Player): #optionnel 2
     #--
     for a_i in self.game.actions:   
       #--changement d'état
-      self.game.move(a_i)           
+      self.game.move(a_i)
+      #--Etape 4
+      key = self.game.hash_code #Etape 4 - 1)
+      if key not in self.decision.memory : pass #Etape 4 - 2)
+      else: #Etape 4 _ 3)
+          if self.decision.memory[key]['exact']==True:
+              return self.game.actions[a_i]
+          elif pf <= self.decision.memory[key]['pf']:
+              return self.decision.memory[key]
+              
       #--récupération informations
       v_i = self.__coupe_alpha(pf-1, alpha, beta)   
       liste_vi.append(v_i)
       #--retour à l'état précédent
       self.game.undo()
       #--traitement de l'information (sortie possible)
-    #--
+    #--Cas de la nouvelle partie
     maximum = liste_vi.index(max(liste_vi))
     self.decision.memory.update({self.game.hash_code : {'pf':pf, "exact":True, "score":maximum, "best_action":self.game.actions[maximum]}}) #dico
     return self.game.actions[maximum]
@@ -77,6 +86,11 @@ class NegAlphaBeta_Memory(Player): #optionnel 2
     i = 0
     while i<len(self.game.actions) and alpha<beta:
       self.game.move(self.game.actions[i])
+      key = self.game.hash_code #Etape 4 - 1)
+      if key not in self.decision.memory : pass #Etape 4 - 2)
+      else: #Etape 4 _ 3)
+          if self.decision.memory[key]['exact']==True:
+              return self.decision.memory[key]['score']
       v_i = -self.__coupe_alpha(pf-1, -beta,-alpha) 
       
       if v_i <= alpha:
