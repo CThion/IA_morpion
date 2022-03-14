@@ -53,7 +53,7 @@ class NegAlphaBeta_Memory(Player): #optionnel 2
     alpha = -101; beta = 101
     pf = self.get_value('pf') #profondeur de calcul
     action = self.__remember(pf, alpha, beta, 'best_action') #vérification mémoire
-    if action[2] !=None : return action 
+    if action[2] !=None : return action[2] #action[2] correspond à self.memory[key]['best_action']
     
     #--état totalement nouveau => calculs
     liste_vi=[] #liste des valeurs estimées des actions les plus proches
@@ -104,7 +104,7 @@ class NegAlphaBeta_Memory(Player): #optionnel 2
               "score":score, 
               "best_action":best_action}})
   # -----------------------------------------------
-  def __coupe_alpha(self, pf, alpha, beta):
+  def __coupe_alpha0(self, pf, alpha, beta):
     """MIN cherche a diminuer beta"""
     if pf == 0:
       
@@ -132,7 +132,7 @@ class NegAlphaBeta_Memory(Player): #optionnel 2
       else: #Etape 4 _ 3)
           if self.decision.memory[key]['exact']==True:
               return self.decision.memory[key]['score']
-      v_i = -self.__coupe_alpha(pf-1, -beta,-alpha) 
+      v_i = -self.__coupe_alpha0(pf-1, -beta,-alpha) 
       
       if v_i <= alpha:
         if self.decision.memory[self.game.hash_code]["exact"]==True:
@@ -152,7 +152,38 @@ class NegAlphaBeta_Memory(Player): #optionnel 2
         self.game.undo()
         self.decision.memory.update({self.game.hash_code:{'pf':pf, "exact":False, "score":beta, "best_action":None}}) #dico
     return beta
+
+  def __coupe_alpha(self, pf, alpha, beta):
+    """MIN cherche a diminuer beta"""
     
+    #--verif si état en mémoire
+    alpha, beta, score = self.__remember(pf, alpha, beta, 'score') #vérification mémoire
+    if score !=None : return score #si on est dans un état qu'on avait déjà trouvé avant
+    
+    #--bout de branche ou victoire : solution complète
+    if pf == 0 or self.game.over() == True :
+      if self.who_am_i == self.game.turn : 
+          self.__learn(pf, True, -self.estimation(), None) #enregistrement 
+          return -self.estimation()
+      else : 
+          self.__learn(pf, True, self.estimation(), None) #enregistrement
+          return self.estimation()
+    
+    #--milieur de branche : solution incomplète
+    i = 0
+    while i<len(self.game.actions) and alpha<beta:
+      self.game.move(self.game.actions[i])#déplacement => changement d'état
+      #--verif si nouvel état dans mémoire
+      alpha, beta, score = self.__remember(pf, alpha, beta, 'score') #vérification mémoire
+      if score !=None : return score #si on est dans un état qu'on avait déjà trouvé avant
+      #--
+      v_i = -self.__coupe_alpha(pf-1, -beta,-alpha) #chaîne récursive
+      self.game.undo()
+      if v_i <= alpha: self.__learn(pf, False, alpha, None); return alpha
+      beta = min(beta, v_i)
+      i = i+1
+    self.__learn(pf, False, beta, None)
+    return beta
 #====================== exemples de code test ==========================#
 def usage():
     print("""
