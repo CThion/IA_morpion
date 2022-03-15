@@ -47,13 +47,15 @@ class NegAlphaBeta_Memory(Player): #optionnel 2
     self.game.state = state # on met à jour l’état du jeu
     if self.game.turn != self.who_am_i:
       print("not my turn to play")
-      return None
+      return None  
     
     #--vérification mémoire
     alpha = -101; beta = 101
     pf = self.get_value('pf') #profondeur de calcul
     action = self.__remember(pf, alpha, beta, 'best_action') #vérification mémoire
-    if action[2] !=None : return action[2] #action[2] correspond à self.memory[key]['best_action']
+    if action[2] !=None : 
+        print("on l'avait en mémoire !")
+        return action[2] #action[2] correspond à self.memory[key]['best_action']
     
     #--état totalement nouveau => calculs
     liste_vi=[] #liste des valeurs estimées des actions les plus proches
@@ -66,6 +68,11 @@ class NegAlphaBeta_Memory(Player): #optionnel 2
       self.game.undo()
     #--
     maximum = liste_vi.index(max(liste_vi)) #indice de la meilleur action
+    print(f"""
+          liste_vi {liste_vi}
+          maximum {maximum}
+          self.game.actions {self.game.actions}
+          """)
     best_action = self.game.actions[maximum] #meilleur action
     self.__learn(pf, True, maximum, best_action)#enregistrement de ce nouvel état
     return best_action
@@ -79,6 +86,11 @@ class NegAlphaBeta_Memory(Player): #optionnel 2
     wishinfo = 'best_action' ou 'score', change selon qu'on appelle __remember
     depuis decision ou depuis cut"""
 
+    print(f"""
+          AVANT
+          self.game.actions {self.game.actions}
+          """)
+
     #--Etape 4 : utilisation de la mémoire 
     res=None #résultat = None a priori
     key = self.game.hash_code #état actuel du jeu
@@ -86,13 +98,18 @@ class NegAlphaBeta_Memory(Player): #optionnel 2
     if key in self.decision.memory : #si état déjà rencontré
         #--si solution exacte (on sait comment gagner)
         etat = self.decision.memory[key]
-        if etat[key]['exact'] or \
-        (not etat[key]['exact'] and pf<=etat[key]['pf']) : 
+        if etat['exact'] or \
+        (not etat['exact'] and pf<=etat['pf']) : 
             res=etat[wishinfo]
         #--si la profondeur restante à explorer est supérieure à la profondeur de découverte de key
         else:
-            alpha = max(alpha, etat[key]['score'])
+            print("HOHOHOHOHOHOHOHOHOHOHOH")
+            alpha = max(alpha, etat['score'])
             if alpha >= beta: return beta # coupe
+    print(f"""
+      AVANT
+      self.game.actions {self.game.actions}
+      """)
     return alpha, beta, res
   # ----------------------------
   def __learn(self, pf, exact, score, best_action):
@@ -240,8 +257,8 @@ jeu3.state == ((3,4), 4)
 def  test_morpion(joueur):
     code = '''
 from morpion import Morpion
-klass = IterativeDeepening
-kargs = {'pf':43, 'secondes':2.} if joueur==klass else {'pf':3, 'nbSim': 100}
+#klass = IterativeDeepening
+kargs = {'pf':3, 'nbSim': 100}
 jeu = Morpion(phase=2) 
 _state = "X...O..OX", 4
 jeu.state = _state
@@ -282,39 +299,48 @@ print("decision was taken in {:.03f}s".format(_end))
 a.decision.memory.get(_defence[0], None)
 ''' ; testcode(code)
 
-def  test_hexapawn(joueur):
-    code = '''
-from hexapawn import Hexapawn
-klass = IterativeDeepening
-kargs = {'pf':43, 'secondes':2} if joueur==klass else {'pf':3, 'nbSim': 100}
-jeu = Hexapawn()
-_state = "X.."+"O.X"+".O.",4
-
-jeu.state = _state
-print(jeu)
-
-a = joueur('a', jeu, **kargs)
-a.who_am_i = jeu.turn
-_start = time.time()
-print(a.decision(_state))
-_end = time.time() - _start
-print("decision was taken in {:.03f}s".format(_end))
-a.decision.memory.get(_state[0], None)
-
-jeu = Hexapawn(4,3)
-_state = "X.X.X.O...OO", 2
-jeu.state = _state
-print(jeu)
-
-joueur.decision.memory = {}
-a = joueur('a', jeu, **kargs)
-a.who_am_i = jeu.turn
-_start = time.time()
-print(a.decision(_state))
-_end = time.time() - _start
-print("decision was taken in {:.03f}s".format(_end))
-a.decision.memory.get(_state[0], None)
-''' ; testcode(code)
-
 if __name__ == "__main__":
-    usage()
+    
+    joueur = NegAlphaBeta_Memory
+    #test_morpion(joueur)
+    
+    from morpion import Morpion
+    #klass = IterativeDeepening
+    jeu = Morpion(phase=2) 
+    _state = "X...O..OX", 4
+    jeu.state = _state
+    print(jeu)
+
+    kargs = {'pf':2, 'nbSim': 100} #paramètre joueur
+    a = joueur('a', jeu, **kargs)
+    a.who_am_i = jeu.turn #mon tour de jouer
+    a.decision(_state)
+    a.decision.memory.get(_state[0], None)
+    
+    
+    # jeu = Morpion(5)
+    # _attack = '.'*5+"..XO."*3+'.'*5, 6
+    # _defence = "X..O."+"."*5+"..XO."*2+'.'*5, 6
+    
+    # jeu.state = _attack
+    # print(jeu)
+    
+    # joueur.decision.memory = {}
+    # a = joueur('a', jeu, **kargs)
+    # a.who_am_i = jeu.turn
+    # _start = time.time()
+    # print(a.decision(_attack))
+    # _end = time.time() - _start
+    # print("decision was taken in {:.03f}s".format(_end))
+    # a.decision.memory.get(_attack[0], None)
+    
+    # jeu.state = _defence
+    # print(jeu)
+    
+    # joueur.decision.memory = {}
+    # _start = time.time()
+    # print(a.decision(_defence))
+    # _end = time.time() - _start
+    # print("decision was taken in {:.03f}s".format(_end))
+    # a.decision.memory.get(_defence[0], None)
+    # ''' ; testcode(code)

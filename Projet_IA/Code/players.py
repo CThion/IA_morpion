@@ -257,10 +257,10 @@ if __name__ == "__main__":
     #--jeu courrant pour les tests :
     jeu = jeu_allumettes
     #--initialisation du context de jeu
-    moi = MinMax('toto', jeu, pf=5)
+    moi = NegAlphaBeta('toto', jeu, pf=5)
     moi.who_am_i = jeu.turn # moi est le premier joueur
     #-- TESTS
-    moi.decision( (7, 6) ) # on attend 1, 2 ou 3 pour Human et Randy
+    print(moi.decision( (7, 6) )) # on attend 1, 2 ou 3 pour Human et Randy
     #print(jeu) # on attend 7 allumettes
 
 def test_decision(joueur):
