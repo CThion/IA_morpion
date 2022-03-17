@@ -99,8 +99,17 @@ class TestLoop(unittest.TestCase):
         except Exception as _e:
             self.assertTrue(isinstance(_e, StopIteration),
                             "expect failure")
-        self.assertEqual(len(_rep), 0,
-                         "expect no decision")
+        # si rep_valide in range(len(actions)) _rep == []
+        # si rep_valide in 1..len(_actions) _rep = [actions[-1]]
+        if len(_rep) != 0:
+            self.assertEqual(len(_rep), 1,
+                             "expect at most 1 decision found {}"
+                             "".format(len(_rep)))
+            self.assertEqual(_rep[0], self.jeu.actions[-1],
+                             "found {}, expect {}".format(_rep[0],
+                                                          self.jeu.actions[-1]))
+        else:
+            self.assertEqual(len(_rep), 0, "expect no decision")
         
 class TestDefault(unittest.TestCase):
     """ check the correct default behavior of 'THAT' """
@@ -129,9 +138,9 @@ class TestBehaviorA(unittest.TestCase):
     """ check the correct default behavior of 'THAT' """
     def setUp(self):
         chk.check_class(tp, THAT)
+        self.jeu = A(13)
         self.K = getattr(tp, THAT)
-        self.o = self.K('x', A(13))
-        self.jeu = self.o.game
+        self.o = self.K('x', self.jeu)
 
     def test_decision_output(self):
         """ given an answer is it ok """
@@ -148,10 +157,9 @@ class TestBehaviorB(unittest.TestCase):
     """ check the correct default behavior of 'THAT' """
     def setUp(self):
         chk.check_class(tp, THAT)
-        jeu = B(7, 17)
+        self.jeu = B(7, 17)
         self.K = getattr(tp, THAT)
-        self.o = self.K('x', jeu)
-        self.jeu = self.o.game
+        self.o = self.K('x', self.jeu)
 
     def test_decision_output(self):
         """ given an answer is it ok """
