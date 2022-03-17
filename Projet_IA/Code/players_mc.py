@@ -50,13 +50,17 @@ class NegAlphaBeta_Memory(Player): #optionnel 2
     if self.game.turn != self.who_am_i:
       print("not my turn to play")
       return None  
+  
+    print(f"""
+      NIVEAU DECISION = avant remember
+      self.game.actions {self.game.actions}
+      """)
     
     #--vérification mémoire
     alpha = -101; beta = 101
     pf = self.get_value('pf') #profondeur de calcul
     action = self.__remember(pf, alpha, beta, 'best_action') #vérification mémoire
     if action[2] !=None : 
-        print("on l'avait en mémoire !")
         return action[2] #action[2] correspond à self.memory[key]['best_action']
     
     #--état totalement nouveau => calculs
@@ -71,9 +75,10 @@ class NegAlphaBeta_Memory(Player): #optionnel 2
     #--
     maximum = liste_vi.index(max(liste_vi)) #indice de la meilleur action
     print(f"""
+          ==========================
+          self.game.actions {self.game.actions}
           liste_vi {liste_vi}
           maximum {maximum}
-          self.game.actions {self.game.actions}
           """)
     best_action = self.game.actions[maximum] #meilleur action
     self.__learn(pf, True, maximum, best_action)#enregistrement de ce nouvel état
@@ -88,11 +93,6 @@ class NegAlphaBeta_Memory(Player): #optionnel 2
     wishinfo = 'best_action' ou 'score', change selon qu'on appelle __remember
     depuis decision ou depuis cut"""
 
-    print(f"""
-          AVANT
-          self.game.actions {self.game.actions}
-          """)
-
     #--Etape 4 : utilisation de la mémoire 
     res=None #résultat = None a priori
     key = self.game.hash_code #état actuel du jeu
@@ -105,11 +105,16 @@ class NegAlphaBeta_Memory(Player): #optionnel 2
             res=etat[wishinfo]
         #--si la profondeur restante à explorer est supérieure à la profondeur de découverte de key
         else:
-            print("HOHOHOHOHOHOHOHOHOHOHOH")
+            print("UPDATE ALPHA BETA memory")
             alpha = max(alpha, etat['score'])
-            if alpha >= beta: return beta # coupe
-    print(f"""
-      AVANT
+            if alpha >= beta: return beta # coupe  
+        print(f"""
+      AVEC remember = cas où mémoire mobilisée
+      self.game.actions {self.game.actions}
+      """)
+    else:
+        print(f"""
+      SANS remember = cas où mémoire NON mobilisé
       self.game.actions {self.game.actions}
       """)
     return alpha, beta, res
@@ -194,14 +199,19 @@ class NegAlphaBeta_Memory(Player): #optionnel 2
       self.game.move(self.game.actions[i])#déplacement => changement d'état
       #--verif si nouvel état dans mémoire
       alpha, beta, score = self.__remember(pf, alpha, beta, 'score') #vérification mémoire
-      if score !=None : return score #si on est dans un état qu'on avait déjà trouvé avant
+      if score !=None : 
+          self.game.undo()
+          return score #si on est dans un état qu'on avait déjà trouvé avant
       #--
       v_i = -self.__coupe_alpha(pf-1, -beta,-alpha) #chaîne récursive
-      self.game.undo()
-      if v_i <= alpha: self.__learn(pf, False, alpha, None); return alpha
+      if v_i <= alpha: 
+          self.__learn(pf, False, alpha, None); 
+          self.game.undo()
+          return alpha
       beta = min(beta, v_i)
       i = i+1
     self.__learn(pf, False, beta, None)
+    self.game.undo()
     return beta
 #====================== exemples de code test ==========================#
 def usage():
@@ -313,9 +323,9 @@ if __name__ == "__main__":
     jeu = Morpion(phase=2) 
     _state = "X...O..OX", 4
     jeu.state = _state
-    print(jeu)
+    #print(jeu)
 
-    kargs = {'pf':2, 'nbSim': 100} #paramètre joueur
+    kargs = {'pf':3, 'nbSim': 100} #paramètre joueur
     a = joueur('a', jeu, **kargs)
     a.who_am_i = jeu.turn #mon tour de jouer
     a.decision(_state)
