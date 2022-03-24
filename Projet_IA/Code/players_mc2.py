@@ -34,13 +34,13 @@ class NegAlphaBeta_Memory(Player): #optionnel 2
   Implémentation similaires à celle de Negamax avec MinMax ;
   Regrouper coupe_alpha et coupe_beta en 1 seul coupe_alpha qui appelle -coupe_alpha
   Paramètres rattaché à chaque config de memory : 
-    -- pf : la profondeur à laquelle l’état est rencontrée, c’est un entier,
-    -- exact : un booléen qui indique si l’évaluation est exacte ce qui est le cas lorsque la partie
-    est terminée, c’est-à-dire soit parce que on est sur une feuille avec self.game.over() est
-    True, soit parce que l’information a été remontée depuis un état où l’évaluation était exacte.
-    -- score : la valeur de l’évaluation
-    -- best_action : l’action ayant produit le score, lorsqu’il n’y a pas d’action, parce que la
-    partie est terminée, l’action sera None
+    -- pf : la profondeur à laquelle l'état est rencontrée, c'est un entier,
+    -- exact : un booléen qui indique si l'évaluation est exacte ce qui est le cas lorsque la partie
+    est terminée, c'est-à-dire soit parce que on est sur une feuille avec self.game.over() est
+    True, soit parce que l'information a été remontée depuis un état où l'évaluation était exacte.
+    -- score : la valeur de l'évaluation
+    -- best_action : l'action ayant produit le score, lorsqu'il n'y a pas d'action, parce que la
+    partie est terminée, l'action sera None
   """
 
 
@@ -50,24 +50,25 @@ class NegAlphaBeta_Memory(Player): #optionnel 2
     if self.game.turn != self.who_am_i:
       print("not my turn to play")
       return None
-    beta = self.WIN+1
+    #--
+    beta = self.WIN+1 #-101 et 101
     alpha = -beta
     _v, _a = alpha, None
-    pf = self.get_value(’pf’)
+    pf = self.get_value('pf')
 
-    # ICI
-    clef = self.game.has_code
+    # ICI : 
+    clef = self.game.hash_code
     if clef in self.decision.memory:
       # clef en mémoire, récupération
       memoire = self.decision.memory[clef]
       # traitement avec éventuel arrêt
-      if memoire[’pf’] >= pf or memoire[’exact’] == True:
-        # arret
-        return memoire[’score’]
-      #si on est ici, c’est qu’il y a un truc en memoire MAIS
-      #pas suffisant pour s’arreter, on peut utiliser le score
+      if memoire['pf'] >= pf or memoire['exact'] == True:
+        # arret car on a un résultat en mémoire plus précis (plus grande profondeur) que ce qu'on pourrait calculer là
+        return memoire['best_action']
+      #si on est ici, c'est qu'il y a un truc en memoire MAIS
+      #pas suffisant pour s'arreter, on peut utiliser le score
       #on peut utiliser best_action (heuristique)
-    # si on est ici c’est qu’on va poursuivre la méthode normale
+    # si on est ici c'est qu'on va poursuivre la méthode normale
     for a in self.game.actions:
       self.game.move(a)
       clef_fils = self.game.hash_code
@@ -84,23 +85,56 @@ class NegAlphaBeta_Memory(Player): #optionnel 2
 
   def __cut(self, pf:int, alpha:float, beta:float) -> float:
     """ we use, max thus cut_beta """
-    # ICI
+    # ICI - check mémoire
+    clef = self.game.hash_code
+    if clef in self.decision.memory:
+        # clef en mémoire, récupération
+        memoire = self.decision.memory[clef]
+        # traitement avec éventuel arrêt
+        if memoire['pf'] >= pf or memoire['exact'] == True:
+            # arret
+            return memoire['score']
+        #si on est ici, c’est qu’il y a un truc en memoire MAIS
+        #pas suffisant pour s’arreter, on peut utiliser le score
+        #on peut utiliser best_action (heuristique)
+    # si on est ici c’est qu’on va poursuivre la méthode normale
+    
+    #FEUILLE
     if pf == 0 or self.game.over():
       _c = 1 if self.who_am_i == self.game.turn else -1
       # ICI
+      self.decision.memory[self.game.hash_code]={'pf':pf,
+                                                 'exact':self.game.over,
+                                                 'score':_c * self.estimation,
+                                                 'best_action':None}
       return _c * self.estimation()
 
+    #PAS FEUILLE
     for a in self.game.actions:
-      if alpha >= beta:
-        # ICI
-        return beta
+      if alpha >= beta: #CONFLIT !!!!!!A TRAITER
+        # ICI - maj memory
+        self.decision.memory[self.game.hash_code]={'pf':pf,
+                                                 'exact':self.game.over,
+                                                 'score':_c * self.estimation,
+                                                 'best_action':None}  
+        return beta #retour niveau précédent
       self.game.move(a)
-      # ICI
+      # ICI - sauvegarde locale info fils
+      clef_fils = self.game.hash_code
       _M = - self.__cut(pf-1, -beta, -alpha)
       self.game.undo()
-      # ICI
+      # ICI - maj SI meilleure valeur
+      if _M > alpha:
+          self.decision.memory[self.game.hash_code]={'pf':pf,
+                                                 'exact':self.decision.memory[clef_fils]['exact'],
+                                                 'score':_M,
+                                                 'best_action':a}        
       alpha = max(_M, alpha)
-    # ICI
+    # ICI - mise a jour
+    self.decision.memory[self.game.hash_code]={'pf':pf,
+                                                 'exact':self.game.over,
+                                                 'score':_c * self.estimation,
+                                                 'best_action':None}  
     return alpha
 #====================== exemples de code test ==========================#
 def usage():

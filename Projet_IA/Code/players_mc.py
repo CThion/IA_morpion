@@ -65,10 +65,10 @@ class NegAlphaBeta_Memory(Player): #optionnel 2
     alpha = -101; beta = 101
     pf = self.get_value('pf') #profondeur de calcul
     action = self.__remember(pf, alpha, beta, 'best_action') #vérification mémoire
-    if action[2] !=None : 
-        return action[2] #action[2] correspond à self.memory[key]['best_action']
+    if action[2] !=None : #action[2] correspond à self.memory[key]['best_action'] 
+        return action[2] 
     
-    #--état totalement nouveau => calculs
+    #--l'état n'est pas en mémoire ==> état totalement nouveau => calculs
     liste_vi=[] #liste des valeurs estimées des actions les plus proches
     #--parcours de toutes les actions les plus proches de la racines 
     for a_i in self.game.actions:   
@@ -88,8 +88,10 @@ class NegAlphaBeta_Memory(Player): #optionnel 2
     best_action = self.game.actions[maximum] #meilleur action
     self.__learn(pf, True, maximum, best_action)#enregistrement de ce nouvel état
     return best_action
+
   # -----------------Partie Dictionnaire-----------
   decision.memory = {}
+  
   # ----------------------------
   def __remember(self, pf, alpha, beta, wishinfo):
     """Vérifie si l'état du jeu a déjà été traité dans self.memory, 
@@ -99,7 +101,7 @@ class NegAlphaBeta_Memory(Player): #optionnel 2
     depuis decision ou depuis cut"""
 
     #--Etape 4 : utilisation de la mémoire 
-    res=None #résultat = None a priori
+    res=None #résultat = None a priori : peut valoir 'best_action' ou 'score' selon le cas
     key = self.game.hash_code #état actuel du jeu
     #--
     if key in self.decision.memory : #si état déjà rencontré
@@ -125,7 +127,8 @@ class NegAlphaBeta_Memory(Player): #optionnel 2
     return alpha, beta, res
   # ----------------------------
   def __learn(self, pf, exact, score, best_action):
-      """Met a jour decision.memory"""
+      """Met a jour decision.memory avec les données qu'on lui fournit.
+      Si une valeur ne doit pas être modifiée, il faut quand même lui founir"""
       self.decision.memory.update(
           {self.game.hash_code : {
               'pf':pf, 
