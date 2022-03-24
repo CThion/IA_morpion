@@ -23,6 +23,11 @@ def scoring(win:int, loss:int, draw:int) -> float:
     return _ratio 
 #===========INFORMATIONS================================================#
 #self.game.hash_code : donne les clés du dictionnaire
+# D = {}
+# D.keys() : clefs du dictionnaire
+# D.values() : toutes les valeurs du dictionnaire
+# D.items() : (clef, valeur), (clef, valeur)
+# 'hashable' : transformable en 1 nbre entier
 #=========== les classes à mettre en oeuvre pour le jalon 03 ===========#
 class NegAlphaBeta_Memory(Player): #optionnel 2
   """
@@ -128,7 +133,7 @@ class NegAlphaBeta_Memory(Player): #optionnel 2
               "score":score, 
               "best_action":best_action}})
   # -----------------------------------------------
-  def __coupe_alpha0(self, pf, alpha, beta):
+  def __coupe_alpha0(self, pf, alpha, beta):#G
     """MIN cherche a diminuer beta"""
     if pf == 0:
       
