@@ -164,6 +164,161 @@ class NegAlphaBeta_Memory(Player): #optionnel 2
     print("parent", parent)
     return score
 #====================== exemples de code test ==========================#
+
+class IterativeDeepening(Player): #optionnel 2
+  """L'objectif de cette classe est de 'muscler' notre base de donnée (memory)
+  Concrêtement, iterativeDeepening :
+      - revoit exactement le même résultat que NegAlphaBeta_Memory
+      - est moins rapide que NegAlphaBeta_Memory
+      - modifie davantage la mémoire car ne se permet pas d'avoir des résultats
+      inéxactes => va parcourir quand même toutes les possibilités !
+  L'idée ici est donc de décomposer notre IA en deux phases : une première phase
+  d'apprentissage ou elle utilisera IterativeDeepening pour construire une mémoire
+  conséquente, puis une phase d'exploitation ou on va passer par NegAlphaBeta_Memory 
+  qui est plus rapide et aura juste à utiliser la mémoire déjà pré-construite"""
+  
+  def decision(self, state):
+      self.game.state = state
+      if self.game.turn != self.who_am_i:
+          print("not my turn to play")
+          return None
+      # the parameters to retrieve
+      pf = self.get_value('pf')
+      second = self.get_value('secondes')
+      depth = ...
+      # alpha , beta
+      _bound = self.WIN +1
+      _start = time.time()
+      while depth <= pf and time.time() - _start < second:
+          _a = self.__old_decision(depth , -_bound , +_bound)
+          # print("elapsed {:.2f} depth = {}"
+          # "".format(time.time() - _start , depth))
+          depth += 1
+      return _a
+  
+
+  def __old_decision(self, state):
+    """ the main method """
+    self.game.state = state
+    if self.game.turn != self.who_am_i:
+      print("not my turn to play")
+      return None
+    beta = self.WIN+1
+    alpha = -beta
+    score, b_a = alpha, None
+    pf = self.get_value('pf')
+
+    #--------TEST MEMORY
+    parent = self.game.hash_code
+    # if parent in self.decision.memory:
+    #   memoire = self.decision.memory[parent] # parent en mémoire, récupération
+    #   #----traitement avec éventuel arrêt
+    #   if memoire['exact']: return memoire['best_action']
+    #   if memoire['pf'] >= pf:
+    #     # arret car on a un résultat en mémoire plus précis (plus grande profondeur) que ce qu'on pourrait calculer là
+    #     return memoire['best_action']
+    #   alpha=max(alpha, memoire["score"])
+    #   if alpha>=beta: self.decision.memory[parent]['pf']=pf; return memoire['best_action']
+    #   else:
+    #       pass
+    #       #si on est ici, c'est qu'il y a un truc en memoire MAIS
+    #       #pas suffisant pour s'arreter, on peut utiliser le score
+    #       #on peut utiliser best_action (heuristique)
+    
+    #--------MEMOIRE VIDE ou PAS INTERESSANTE ==> GO LES CALCULS 
+    #si on est ici c'est qu'on va poursuivre la méthode normale    
+    for a in self.game.actions:
+      self.game.move(a)
+      parent_fils = self.game.hash_code
+      #ICI
+      _v_new = - self.__cut(pf-1, alpha, beta)
+      print(_v_new)
+      self.game.undo()
+      if _v_new > score:
+        score, b_a = _v_new, a
+        score = _v_new
+        exact=self.decision.memory[parent_fils]['exact']
+    # ICI
+    self.decision.memory[parent]={'pf':pf,
+                                'exact':exact,
+                                'score':score,
+                                'best_action':b_a}            
+    return b_a
+  decision.memory = {}
+
+
+  def __cut(self, pf:int, alpha:float, beta:float) -> float:
+    """ we use, max thus cut_beta """
+    print("---------")
+    
+    parent = self.game.hash_code
+    
+    #--------CHECK MEMORY
+    if parent in self.decision.memory:
+        memoire = self.decision.memory[parent] # parent en mémoire, récupération
+        #----traitement avec éventuel arrêt
+        if memoire['exact']: return memoire['score']
+        if memoire['pf'] >= pf:
+          # arret car on a un résultat en mémoire plus précis (plus grande profondeur) que ce qu'on pourrait calculer là
+          return memoire['score']
+        alpha=max(alpha, memoire["score"])
+        if alpha>=beta: self.decision.memory[parent]['pf']=pf; return memoire['score']
+        
+    #--------FEUILLE
+    if pf == 0 or self.game.over():
+      _c = 1 if self.who_am_i == self.game.turn else -1 #coef du résultat (+1 ou -1)
+      # ICI - maj
+      score = _c * self.estimation() #(+100 ou -100)
+      self.decision.memory[parent]={'pf':pf,
+                                  'exact':self.game.over(),
+                                  'score':score,
+                                  'best_action':None}
+      print('feuille', score)
+      return score
+
+    #--------PAS FEUILLE
+    score=-(self.WIN+1)
+    exact=False
+    best_action=None
+    
+    for a in self.game.actions:
+      #----CONFLIT
+      if alpha >= beta:
+        # ICI - on enregistre le fait qu'il ne sert à rien de jouer ce coup 
+        self.decision.memory[parent]={'pf':pf,
+                                    'exact':exact,
+                                    'score':score, #aucun score renvoyé car conflit 
+                                    'best_action':best_action} 
+        print("parent", parent)
+        return beta #retour niveau précédent
+    
+      #----PAS CONFLIT => OK
+      self.game.move(a)
+      parent_fils = self.game.hash_code # ICI - sauvegarde locale info fils
+      print("her we go again")
+      _M = - self.__cut(pf-1, -beta, -alpha) # SCORE (_Mesure)
+      print(_M)
+      self.game.undo()
+      # ICI - maj SI meilleure valeur <=> si alpha est modifié => on retien quel fils est responsable de cette modification
+      #il n'y a pas de sauvegarde dans le cas contraire !
+      #Dans tous les cas, à une profondeur donnée, alpha sera forcément mis à jour au moins une fois 
+      if _M > score: #Il faut intialiser par une variable différente de alpha qui sera égale à -1000 (sinon au niveau de la boucle la comparaison sera tjr avec alpha)
+          #--valeur tampon pour renvoi final du noeud 
+          score=_M
+          exact=self.decision.memory[parent_fils]['exact']
+          best_action=a
+      alpha = max(_M, score)            
+    # ICI - mise a jour du neud : valeur finale renvoyée une fois toutes les branches fils parcourues
+    self.decision.memory[parent]={'pf':pf,
+                                'exact':exact,
+                                'score':score,
+                                'best_action':best_action}  
+    print("basic", alpha)
+    print("parent", parent)
+    return score    
+    
+
+
 def usage():
     print("""
 > test_clever(cls)
