@@ -163,15 +163,15 @@ class NegAlphaBeta_Memory(Player): #optionnel 2
     print("basic", alpha)
     print("parent", parent)
     return score
-#====================== exemples de code test ==========================#
+#===============================================================================#
 
 class IterativeDeepening(Player): #optionnel 2
   """L'objectif de cette classe est de 'muscler' notre base de donnée (memory)
   Concrêtement, iterativeDeepening :
-      - revoit exactement le même résultat que NegAlphaBeta_Memory
+      - renvoit exactement le même résultat que NegAlphaBeta_Memory
       - est moins rapide que NegAlphaBeta_Memory
       - modifie davantage la mémoire car ne se permet pas d'avoir des résultats
-      inéxactes => va parcourir quand même toutes les possibilités !
+      inexacts => va parcourir quand même toutes les possibilités !
   L'idée ici est donc de décomposer notre IA en deux phases : une première phase
   d'apprentissage ou elle utilisera IterativeDeepening pour construire une mémoire
   conséquente, puis une phase d'exploitation ou on va passer par NegAlphaBeta_Memory 
@@ -185,54 +185,27 @@ class IterativeDeepening(Player): #optionnel 2
       # the parameters to retrieve
       pf = self.get_value('pf')
       second = self.get_value('secondes')
-      depth = ...
+      depth = 10
       # alpha , beta
       _bound = self.WIN +1
       _start = time.time()
+      #_a=0
       while depth <= pf and time.time() - _start < second:
           _a = self.__old_decision(depth , -_bound , +_bound)
           # print("elapsed {:.2f} depth = {}"
           # "".format(time.time() - _start , depth))
+          
           depth += 1
       return _a
   
 
-  def __old_decision(self, state):
-    """ the main method """
-    self.game.state = state
-    if self.game.turn != self.who_am_i:
-      print("not my turn to play")
-      return None
-    beta = self.WIN+1
-    alpha = -beta
-    score, b_a = alpha, None
-    pf = self.get_value('pf')
-
-    #--------TEST MEMORY
-    parent = self.game.hash_code
-    # if parent in self.decision.memory:
-    #   memoire = self.decision.memory[parent] # parent en mémoire, récupération
-    #   #----traitement avec éventuel arrêt
-    #   if memoire['exact']: return memoire['best_action']
-    #   if memoire['pf'] >= pf:
-    #     # arret car on a un résultat en mémoire plus précis (plus grande profondeur) que ce qu'on pourrait calculer là
-    #     return memoire['best_action']
-    #   alpha=max(alpha, memoire["score"])
-    #   if alpha>=beta: self.decision.memory[parent]['pf']=pf; return memoire['best_action']
-    #   else:
-    #       pass
-    #       #si on est ici, c'est qu'il y a un truc en memoire MAIS
-    #       #pas suffisant pour s'arreter, on peut utiliser le score
-    #       #on peut utiliser best_action (heuristique)
-    
-    #--------MEMOIRE VIDE ou PAS INTERESSANTE ==> GO LES CALCULS 
-    #si on est ici c'est qu'on va poursuivre la méthode normale    
+  def __old_decision(self,pf:int,alpha:float,beta:float):
+    """ the main method """     
     for a in self.game.actions:
       self.game.move(a)
       parent_fils = self.game.hash_code
       #ICI
       _v_new = - self.__cut(pf-1, alpha, beta)
-      print(_v_new)
       self.game.undo()
       if _v_new > score:
         score, b_a = _v_new, a
@@ -245,7 +218,7 @@ class IterativeDeepening(Player): #optionnel 2
                                 'best_action':b_a}            
     return b_a
   decision.memory = {}
-
+  #--
 
   def __cut(self, pf:int, alpha:float, beta:float) -> float:
     """ we use, max thus cut_beta """
@@ -318,7 +291,7 @@ class IterativeDeepening(Player): #optionnel 2
     return score    
     
 
-
+#====================== exemples de code test ==========================#
 def usage():
     print("""
 > test_clever(cls)
