@@ -65,9 +65,19 @@ class NegAlphaBeta_Memory(Player): #optionnel 2
         # arret car on a un résultat en mémoire plus précis (plus grande profondeur) que ce qu'on pourrait calculer là
         return memoire['best_action']
       alpha=max(alpha, memoire["score"])
-      if alpha>=beta: self.decision.memory[parent]['pf']=pf; return memoire['best_action']
+      if alpha>=beta: memoire['pf']=pf; return memoire['best_action']
       else:
-          pass
+          b_a = memoire["best_action"] #best_cation que l'on avait déjà trouvé par le passé (en mémoire)
+          L_a = list(self.game.actions) #liste des actions
+          id_a = L_a.index(b_a)
+          L_a.insert(0, L_a.pop(id_a)) #mets le b_a en première position
+          print(f"""
+                L_a = {L_a}
+                b_a = {b_a}
+                """)
+         
+          #self.game.actions = tuple(L_a)
+          
           #si on est ici, c'est qu'il y a un truc en memoire MAIS
           #pas suffisant pour s'arreter, on peut utiliser le score
           #on peut utiliser best_action (heuristique)
@@ -185,7 +195,7 @@ class IterativeDeepening(Player): #optionnel 2
       # the parameters to retrieve
       pf = self.get_value('pf')
       second = self.get_value('secondes')
-      depth = 10
+      depth = 1
       # alpha , beta
       _bound = self.WIN +1
       _start = time.time()
@@ -200,7 +210,11 @@ class IterativeDeepening(Player): #optionnel 2
   
 
   def __old_decision(self,pf:int,alpha:float,beta:float):
-    """ the main method """     
+    """ the main method 
+    """     
+    
+    score = alpha
+    parent = self.game.hash_code
     for a in self.game.actions:
       self.game.move(a)
       parent_fils = self.game.hash_code
@@ -289,7 +303,25 @@ class IterativeDeepening(Player): #optionnel 2
     print("basic", alpha)
     print("parent", parent)
     return score    
-    
+#=======================================================================
+class Randy_MC(Player):
+    def decision(self, state):
+        """ get the state """
+        self.game.state = state
+        if self.game.turn != self.who_am_i:
+            print("not my turn to play")
+            return None
+        nbSim = self.get_value('nbSim')
+        print("nbsim : ", nbSim)
+        # description algorithmique
+        l_ratios = []
+        for a in self.game.actions :
+            self.game.move(a)
+            res0, res1 , res2 = self.simulation(nbSim,True)
+            l_ratios.append(scoring(res0,res1,res2))
+            
+            self.game.undo()
+        return self.game.actions[l_ratios.index(max(l_ratios))]  
 
 #====================== exemples de code test ==========================#
 def usage():
@@ -396,16 +428,19 @@ if __name__ == "__main__":
                      
     jeu = Matches(13, True)
                      
-    joueur=NegAlphaBeta_Memory('tot', jeu, pf=3)
+    joueur=Randy_MC('tot', jeu, pf=3)
     
     joueur.who_am_i=jeu.turn
                      
-    joueur.decision.memory
+   
                      
-    NegAlphaBeta_Memory.decision.memory={}
+    Randy_MC.decision.memory={}
                      
     joueur.decision((4,4))
+    joueur.decision((4,4))
+    joueur.decision((4,4))
+    joueur.decision((3,2))
                      
-    for k in joueur.decision.memory:
+    # for k in joueur.decision.memory:
         
-        print(k, joueur.decision.memory[k])
+    #     print(k, joueur.decision.memory[k])

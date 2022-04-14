@@ -41,55 +41,60 @@ from allumettes import Matches
 jeu = Matches(13, True) # le but prendre la dernière allumette
 jeu.state == (13, 0) # on attend True au test
 
+joueur.decision.memory = {}
 moi = joueur('toto', jeu, pf=3)
 moi.who_am_i = jeu.turn # moi est le premier joueur
 moi.decision( (3, 4) ) == 3 # on attend True au test
-jeu.state == (3, 4) # on attend True au test
+moi.game.state == (3, 4) # on attend True au test
+jeu.state == (13, 0) # on attend True au test
 
 moi.decision( (5, 4) ) == 1 # on attend True au test
-jeu.state == (5, 4) # on attend True au test
+moi.game.state == (5, 4) # on attend True au test
 
 moi.decision( (6, 4) ) == 2 # on attend True au test
-jeu.state == (6, 4) # on attend True au test
+moi.game.state == (6, 4) # on attend True au test
 
 jeu2 = Matches(13, False) # le but ne pas prendre la dernière allumette
+joueur.decision.memory = {}
 moi = joueur('toto', jeu2, pf=3)
 moi.who_am_i = jeu2.turn # moi est le premier joueur
 moi.decision( (3, 4) ) == 2# on attend True au test
-jeu2.state == (3, 4)  # on attend True au test
+moi.game.state == (3, 4)  # on attend True au test
 
 moi.decision( (4, 4) ) == 3 # on attend True au test
-jeu2.state == (4, 4) # on attend True au test
+moi.game.state == (4, 4) # on attend True au test
 
 moi.decision( (5, 4) ) == 1 # on attend True au test
-jeu2.state == (5, 4) # on attend True au test
+moi.game.state == (5, 4) # on attend True au test
 
 moi.decision( (6, 4) ) == 1 # on attend True au test
-jeu2.state == (6, 4) # on attend True au test
+moi.game.state == (6, 4) # on attend True au test
 
 from divide_left import Divide
 jeu3 = Divide(7, 17)
+joueur.decision.memory = {}
 moi = joueur('malin', jeu3, pf=3)
 moi.who_am_i = jeu3.turn # moi est le premier joueur
 moi.decision( ((3,4), 4) ) == ('A', 1)
-jeu3.state == ((3,4), 4)
+moi.game.state == ((3,4), 4)
 ''' ; testcode(code)
     
 def  test_morpion(joueur):
     code = '''
 from morpion import Morpion
-klass = IterativeDeepening
-kargs = {'pf':43, 'secondes':2.} if joueur==klass else {'pf':3, 'nbSim': 100}
+klass = 'IterativeDeepening' == joueur.__name__
+kargs = {'pf':43, 'secondes':2.} if klass else {'pf':3, 'nbSim': 100}
 jeu = Morpion(phase=2) 
 _state = "X...O..OX", 4
 jeu.state = _state
 print(jeu)
 
+joueur.decision.memory = {}
 a = joueur('a', jeu, **kargs)
 a.who_am_i = jeu.turn
-_start = time.time()
+_start = time.perf_counter()
 print(a.decision(_state))
-_end = time.time() - _start
+_end = time.perf_counter() - _start
 print("decision was taken in {:.03f}s".format(_end))
 a.decision.memory.get(_state[0], None)
 
@@ -103,9 +108,9 @@ print(jeu)
 joueur.decision.memory = {}
 a = joueur('a', jeu, **kargs)
 a.who_am_i = jeu.turn
-_start = time.time()
+_start = time.perf_counter()
 print(a.decision(_attack))
-_end = time.time() - _start
+_end = time.perf_counter() - _start
 print("decision was taken in {:.03f}s".format(_end))
 a.decision.memory.get(_attack[0], None)
 
@@ -113,9 +118,9 @@ jeu.state = _defence
 print(jeu)
 
 joueur.decision.memory = {}
-_start = time.time()
+_start = time.perf_counter()
 print(a.decision(_defence))
-_end = time.time() - _start
+_end = time.perf_counter() - _start
 print("decision was taken in {:.03f}s".format(_end))
 a.decision.memory.get(_defence[0], None)
 ''' ; testcode(code)
@@ -123,19 +128,20 @@ a.decision.memory.get(_defence[0], None)
 def  test_hexapawn(joueur):
     code = '''
 from hexapawn import Hexapawn
-klass = IterativeDeepening
-kargs = {'pf':43, 'secondes':2} if joueur==klass else {'pf':3, 'nbSim': 100}
+klass = 'IterativeDeepening' == joueur.__name__
+kargs = {'pf':43, 'secondes':2} if klass else {'pf':3, 'nbSim': 100}
 jeu = Hexapawn()
 _state = "X.."+"O.X"+".O.",4
 
 jeu.state = _state
 print(jeu)
 
+joueur.decision.memory = {}
 a = joueur('a', jeu, **kargs)
 a.who_am_i = jeu.turn
-_start = time.time()
+_start = time.perf_counter()
 print(a.decision(_state))
-_end = time.time() - _start
+_end = time.perf_counter() - _start
 print("decision was taken in {:.03f}s".format(_end))
 a.decision.memory.get(_state[0], None)
 
@@ -147,9 +153,9 @@ print(jeu)
 joueur.decision.memory = {}
 a = joueur('a', jeu, **kargs)
 a.who_am_i = jeu.turn
-_start = time.time()
+_start = time.perf_counter()
 print(a.decision(_state))
-_end = time.time() - _start
+_end = time.perf_counter() - _start
 print("decision was taken in {:.03f}s".format(_end))
 a.decision.memory.get(_state[0], None)
 ''' ; testcode(code)

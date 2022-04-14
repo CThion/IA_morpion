@@ -89,7 +89,7 @@ class Player:
         """ a 3 states simple estimation for root's player
         require WIN > 0
         require WIN = - LOSS
-        ensure return is one of the 3 values
+        ensure return is one of the 3 values WIN/LOSS/0
         """
         if not self.game.over(): _e = 0
         elif self.game.winner is None: _e = 0
@@ -97,12 +97,14 @@ class Player:
         else: _e = - self.WIN
         return _e
 
-    def simulation(self, n:int=10) -> list:
-        """ run n games 
-            count the win/loss/draw for root's player 
+    def simulation(self, n:int=10, rootPlayer:bool=True) -> list:
+        """ run n games [default=10]
+            count the win/loss/draw for root's player [default=True]
             require n > 0
+            provides [v,d,n] where n = v+d+n
         """
         _count = [0,0,0] # win, loss, draw
+        _refplayer = self.who_am_i if rootPlayer else self.game.turn
         for _ in range(n):
             _nbMoves = 0
             while not self.game.over():
@@ -110,10 +112,11 @@ class Player:
                 self.game.move(_a)
                 _nbMoves += 1
             if self.game.winner is None: _i = -1
-            elif self.game.winner == self.who_am_i: _i = 0
+            elif self.game.winner == _refplayer: _i = 0
             else: _i = 1
             _count[_i] += 1
             for _ in range(_nbMoves): self.game.undo()
+        
         return _count[:]
 
             

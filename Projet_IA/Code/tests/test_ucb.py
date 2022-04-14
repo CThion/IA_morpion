@@ -4,8 +4,8 @@
 
 __author__ = "mmc <marc-michel dot corsini at u-bordeaux dot fr>"
 __date__ = "01.04.21"
-__usage__ = "Project 2022: tests jalon 03: Randy_MC"
-__update__ = "25.02.22"
+__usage__ = "Project 2022: tests jalon 03: UCB"
+__update__ = "11.04.22"
 
 import os
 import unittest
@@ -17,7 +17,7 @@ from dice import Dice # TestAnswersDice
 from morpion import Morpion # TestAnswersTTT
 import random
 
-THAT="Randy_MC"
+THAT="UCB"
 
 def mock_prn(*args, **kargs):
     """ no output allowed """
@@ -217,7 +217,7 @@ class TestMorpion(unittest.TestCase):
         chk.check_class(tp, klass)
         self.jeu = Morpion(5) # à définir
         self.K = getattr(tp, klass)
-        self.sims = (50, 75, 100) # (10, 50, 100)
+        self.sims = (10, 50, 100)
         
     @patch('builtins.print')    
     def test_attak(self, mock_prn):
@@ -234,9 +234,9 @@ class TestMorpion(unittest.TestCase):
                 _val = [_rep[0] == x for x in _rep ]
                 self.assertTrue(all(_val),
                         "expected the same answer {}".format(_rep[0]))
-                _1 = jeu.actions[2]
-                self.assertEqual(_rep[0], _1,
-                         "expected {}, found {}".format(_1, _rep[0]))
+                _1 = jeu.actions[2][1]
+                self.assertEqual(_rep[0][1], _1,
+                         "expected col {}, found {}".format(_1, _rep[0][1]))
 
     @patch('builtins.print')    
     def test_defence(self, mock_prn):

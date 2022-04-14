@@ -316,10 +316,13 @@ class TestMemory(unittest.TestCase):
 
     @patch('builtins.print')
     def test_subkeys_values(self, mock_prn):
-        """ check data values """
+        """ check data values for DO NOT Take the last """
         _required = "pf exact score best_action".split()
         _, _test_dict = self.subtest_data()
         self.K.decision.memory = {}
+        self.assertEqual(self.o.decision.memory, dict(),
+                         "expect an empty memory, found {}"
+                         "".format(self.o.decision.memory))
         _1 = self.o.decision( (4, 4) )
         self.assertEqual(_1, 3, "decision should return 3, found {}".format(_1))
         _memory = self.K.decision.memory
