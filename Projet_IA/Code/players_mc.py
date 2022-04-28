@@ -335,7 +335,270 @@ class Randy_MC(Player):
                 best_score = score
                 best_action = a
         return best_action
+#=======================================================================
+class NegAlphaBeta_MC(Player): 
+  """
+  Implémentation similaires à celle de Negamax avec MinMax ;
+  Regrouper coupe_alpha et coupe_beta en 1 seul coupe_alpha qui appelle -coupe_alpha
+  """
+  def decision(self, state):
+    self.game.state = state # on met à jour l’état du jeu
+    if self.game.turn != self.who_am_i:
+      print("not my turn to play")
+      return None
+    # maintenant on peut travailler
+    pf = self.get_value('pf') #on récupère la profondeur
+    alpha = -101 #alpha et beta ne sont pas choisies par l'utilisateur
+    beta = 101  #  +- self.WIN +-1 (aide_jalon_02 p11)
+    liste_vi=[]
+    #--
+    for a_i in self.game.actions:   #pour chaque action
+      #--changement d'état
+      self.game.move(a_i)           #j'avance sur l'une des actions disponible
+      #--récupération informations
+      v_i = self.__coupe_alpha(pf-1, alpha, beta)   
+      liste_vi.append(v_i)
+      #--retour à l'état précédent
+      self.game.undo()
+      #--traitement de l'information (sortie possible)
+    #--
+    maximum = liste_vi.index(max(liste_vi))
+    return self.game.actions[maximum]
+  # -----------------------------------------------
+  def __coupe_alpha(self, pf, alpha, beta):
+    """MIN cherche a diminuer beta"""
+    nbSim = self.get_value('nbSim')
+    if self.game.over() == True :
+      if self.who_am_i == self.game.turn : return -self.estimation()
+      else : return self.estimation()
+    if pf == 0:
+        if self.who_am_i == self.game.turn :
+            win, loss, draw = self.simulation(nbSim,False)
+            return self.WIN * scoring(win,loss,draw)
+        else :
+            win, loss, draw = self.simulation(nbSim)
+            return self.WIN * scoring(win,loss,draw)
+        
+    i = 0
+    while i<len(self.game.actions) and alpha<beta:
+      self.game.move(self.game.actions[i])
+      v_i = -self.__coupe_alpha(pf-1, -beta,-alpha) #chaîne récursive
+      self.game.undo()
+      if v_i <= alpha: return alpha
+      beta = min(beta, v_i)
+      i = i+1
+    return beta
+#=======================================================================
+class NegAlphaBeta_Memory_MC(Player): #1 FAIL A CORRIGER
+  """
+  Implémentation similaires à celle de Negamax avec MinMax ;
+  Regrouper coupe_alpha et coupe_beta en 1 seul coupe_alpha qui appelle -coupe_alpha
+  Paramètres rattaché à chaque config de memory : 
+    -- pf : la profondeur à laquelle l'état est rencontrée, c'est un entier,
+    -- exact : un booléen qui indique si l'évaluation est exacte ce qui est le cas lorsque la partie
+    est terminée, c'est-à-dire soit parce que on est sur une feuille avec self.game.over() est
+    True, soit parce que l'information a été remontée depuis un état où l'évaluation était exacte.
+    -- score : la valeur de l'évaluation
+    -- best_action : l'action ayant produit le score, lorsqu'il n'y a pas d'action, parce que la
+    partie est terminée, l'action sera None
+  """
 
+
+  def decision(self, state):
+    """ the main method """
+    self.game.state = state
+    if self.game.turn != self.who_am_i:
+      print("not my turn to play")
+      return None
+    beta = self.WIN+1
+    alpha = -beta
+    score, b_a = alpha, None
+    pf = self.get_value('pf')
+    #--------Heuristique
+##    clef = self.game.actions
+##    liste_actions = list(self.game.actions)
+##    for a in clef:
+##        if a in self.decision.memory:
+##            if pf == 0 or self.decision.memory[a]['exact']==True : return a
+##            alpha = max(alpha,self.decision.memory[a]['score'])
+##            if alpha >=beta : return a
+##            if self.decision.memory[a]['best_action']!=None:liste_actions.insert(0, liste_actions.pop(a))
+    #--------TEST MEMORY
+    parent = self.game.hash_code
+    if parent in self.decision.memory:
+      memoire = self.decision.memory[parent] # parent en mémoire, récupération
+      #----traitement avec éventuel arrêt
+      if memoire['exact']: return memoire['best_action']
+      if memoire['pf'] >= pf:
+        # arret car on a un résultat en mémoire plus précis (plus grande profondeur) que ce qu'on pourrait calculer là
+        return memoire['best_action']
+      alpha=max(alpha, memoire["score"])
+      if alpha>=beta: memoire['pf']=pf; return memoire['best_action']
+      else:
+          b_a = memoire["best_action"] #best_cation que l'on avait déjà trouvé par le passé (en mémoire)
+          L_a = list(self.game.actions) #liste des actions
+          id_a = L_a.index(b_a)
+          L_a.insert(0, L_a.pop(id_a)) #mets le b_a en première position
+          print(f"""
+                L_a = {L_a}
+                b_a = {b_a}
+                """)
+         
+          #self.game.actions = tuple(L_a)
+          
+          #si on est ici, c'est qu'il y a un truc en memoire MAIS
+          #pas suffisant pour s'arreter, on peut utiliser le score
+          #on peut utiliser best_action (heuristique)
+    
+    #--------MEMOIRE VIDE ou PAS INTERESSANTE ==> GO LES CALCULS 
+    #si on est ici c'est qu'on va poursuivre la méthode normale    
+    for a in self.game.actions:
+      self.game.move(a)
+      parent_fils = self.game.hash_code
+      #ICI
+      _v_new = - self.__cut(pf-1, alpha, beta)
+      print(_v_new)
+      self.game.undo()
+      if _v_new > score:
+        score, b_a = _v_new, a
+        score = _v_new
+        exact=self.decision.memory[parent_fils]['exact']
+    # ICI
+    self.decision.memory[parent]={'pf':pf,
+                                'exact':exact,
+                                'score':score,
+                                'best_action':b_a}            
+    return b_a
+  decision.memory = {}
+
+
+  def __cut(self, pf:int, alpha:float, beta:float) -> float:
+    """ we use, max thus cut_beta """
+    print("---------")
+    
+    parent = self.game.hash_code
+    nbSim = self.get_value('nbSim')
+    #--------CHECK MEMORY
+    if parent in self.decision.memory:
+        memoire = self.decision.memory[parent] # parent en mémoire, récupération
+        #----traitement avec éventuel arrêt
+        if memoire['exact']: return memoire['score']
+        if memoire['pf'] >= pf:
+          # arret car on a un résultat en mémoire plus précis (plus grande profondeur) que ce qu'on pourrait calculer là
+          return memoire['score']
+        alpha=max(alpha, memoire["score"])
+        if alpha>=beta: self.decision.memory[parent]['pf']=pf; return memoire['score']
+        
+    #--------FEUILLE       
+    if self.game.over():
+      _c = 1 if self.who_am_i == self.game.turn else -1 #coef du résultat (+1 ou -1)
+      # ICI - maj
+      score = _c * self.estimation() #(+100 ou -100)
+      self.decision.memory[parent]={'pf':pf,
+                                  'exact':self.game.over(),
+                                  'score':score,
+                                  'best_action':None}
+      print('feuille', score)
+      return score
+    if pf == 0:
+        if self.who_am_i == self.game.turn :
+            win, loss, draw = self.simulation(nbSim)
+            score = self.WIN * scoring(win,loss,draw)
+            self.decision.memory[parent]={'pf':pf,
+                                  'exact':self.game.over(),
+                                  'score':score,
+                                  'best_action':None}
+            return score
+        else :
+            win, loss, draw = self.simulation(nbSim,False)
+            score = self.WIN * scoring(win,loss,draw)
+            self.decision.memory[parent]={'pf':pf,
+                                  'exact':self.game.over(),
+                                  'score':score,
+                                  'best_action':None}
+            return score
+    #--------PAS FEUILLE
+    score=-(self.WIN+1)
+    exact=False
+    best_action=None
+    
+    for a in self.game.actions:
+      #----CONFLIT
+      if alpha >= beta:
+        # ICI - on enregistre le fait qu'il ne sert à rien de jouer ce coup 
+        self.decision.memory[parent]={'pf':pf,
+                                    'exact':exact,
+                                    'score':score, #aucun score renvoyé car conflit 
+                                    'best_action':best_action} 
+        print("parent", parent)
+        return beta #retour niveau précédent
+    
+      #----PAS CONFLIT => OK
+      self.game.move(a)
+      parent_fils = self.game.hash_code # ICI - sauvegarde locale info fils
+      print("her we go again")
+      _M = - self.__cut(pf-1, -beta, -alpha) # SCORE (_Mesure)
+      print(_M)
+      self.game.undo()
+      # ICI - maj SI meilleure valeur <=> si alpha est modifié => on retien quel fils est responsable de cette modification
+      #il n'y a pas de sauvegarde dans le cas contraire !
+      #Dans tous les cas, à une profondeur donnée, alpha sera forcément mis à jour au moins une fois 
+      if _M > score: #Il faut intialiser par une variable différente de alpha qui sera égale à -1000 (sinon au niveau de la boucle la comparaison sera tjr avec alpha)
+          #--valeur tampon pour renvoi final du noeud 
+          score=_M
+          exact=self.decision.memory[parent_fils]['exact']
+          best_action=a
+      alpha = max(_M, score)            
+    # ICI - mise a jour du neud : valeur finale renvoyée une fois toutes les branches fils parcourues
+    self.decision.memory[parent]={'pf':pf,
+                                'exact':exact,
+                                'score':score,
+                                'best_action':best_action}  
+    print("basic", alpha)
+    print("parent", parent)
+    return score
+#=======================================================================
+import numpy as np
+class UCB(Player):
+    
+    def decision(self, state):
+        self.game.state = state
+        if self.game.turn != self.who_am_i:
+            print (" not my turn to play ")
+            return None
+        
+        _scores = []
+        _nbSims = self.get_value('nbSim')
+        if _nbSims < 1: return None
+        
+        for a in self.game.actions :
+            self.game.move(a)
+            _scores.append(self.simulation(1)) # stockage
+            self.game.undo()
+      
+        for i in range((_nbSims -1)*len(self.game.actions)):
+            best_ucb = -1000
+            best_action = None
+            # déterminer idx qui maximise formule UCB
+            for a in _scores:
+                utilite_a = scoring(a[0],a[1],a[2])
+                ucb_a = utilite_a + 0.3 * np.sqrt(np.log(_nbSims)/(1+i))
+                if ucb_a > best_ucb:
+                    best_action, best_ucb = a, ucb_a
+                    #best_action, best_ucb = self.game.actions[_scores.index(a)], ucb_a
+            idx = _scores.index(best_action)
+            b = self.game.actions[idx]
+            self.game.move(b)
+            _resultat = self.simulation(1)
+            self.game.undo()
+            # mettre à jour _scores [idx] avec _resultat
+            _scores[idx] = _resultat
+            
+            
+        # déterminer a qui maximise formule UCB
+
+        self.game.actions[_scores.index(max([_scores[k][0] for k in range(len(_scores))]))]
+        return a
 #====================== exemples de code test ==========================#
 def usage():
     print("""
