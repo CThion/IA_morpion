@@ -42,8 +42,6 @@ class NegAlphaBeta_Memory(Player): #optionnel 2
     -- best_action : l'action ayant produit le score, lorsqu'il n'y a pas d'action, parce que la
     partie est terminée, l'action sera None
   """
-
-
   def decision(self, state):
     """ the main method """
     self.game.state = state
@@ -54,17 +52,9 @@ class NegAlphaBeta_Memory(Player): #optionnel 2
     alpha = -beta
     score, b_a = alpha, None
     pf = self.get_value('pf')
-    #--------Heuristique
-##    clef = self.game.actions
-##    liste_actions = list(self.game.actions)
-##    for a in clef:
-##        if a in self.decision.memory:
-##            if pf == 0 or self.decision.memory[a]['exact']==True : return a
-##            alpha = max(alpha,self.decision.memory[a]['score'])
-##            if alpha >=beta : return a
-##            if self.decision.memory[a]['best_action']!=None:liste_actions.insert(0, liste_actions.pop(a))
     #--------TEST MEMORY
     parent = self.game.hash_code
+    L_a = self.game.actions
     if parent in self.decision.memory:
       memoire = self.decision.memory[parent] # parent en mémoire, récupération
       #----traitement avec éventuel arrêt
@@ -75,29 +65,18 @@ class NegAlphaBeta_Memory(Player): #optionnel 2
       alpha=max(alpha, memoire["score"])
       if alpha>=beta: memoire['pf']=pf; return memoire['best_action']
       else:
-          b_a = memoire["best_action"] #best_cation que l'on avait déjà trouvé par le passé (en mémoire)
           L_a = list(self.game.actions) #liste des actions
-          id_a = L_a.index(b_a)
-          L_a.insert(0, L_a.pop(id_a)) #mets le b_a en première position
-          print(f"""
-                L_a = {L_a}
-                b_a = {b_a}
-                """)
-         
-          #self.game.actions = tuple(L_a)
-          
-          #si on est ici, c'est qu'il y a un truc en memoire MAIS
-          #pas suffisant pour s'arreter, on peut utiliser le score
-          #on peut utiliser best_action (heuristique)
-    
+          id_a = L_a.index(memoire['best_action'])
+          L_a.pop(id_a) #mets le b_a en première position
+          L_a.insert(0,memoire['best_action'])
+          L_a = tuple(L_a)
     #--------MEMOIRE VIDE ou PAS INTERESSANTE ==> GO LES CALCULS 
     #si on est ici c'est qu'on va poursuivre la méthode normale    
-    for a in self.game.actions:
+    for a in L_a:
       self.game.move(a)
       parent_fils = self.game.hash_code
       #ICI
       _v_new = - self.__cut(pf-1, alpha, beta)
-      print(_v_new)
       self.game.undo()
       if _v_new > score:
         score, b_a = _v_new, a
@@ -110,14 +89,10 @@ class NegAlphaBeta_Memory(Player): #optionnel 2
                                 'best_action':b_a}            
     return b_a
   decision.memory = {}
-
-
+  # ----
   def __cut(self, pf:int, alpha:float, beta:float) -> float:
     """ we use, max thus cut_beta """
-    print("---------")
-    
     parent = self.game.hash_code
-    
     #--------CHECK MEMORY
     if parent in self.decision.memory:
         memoire = self.decision.memory[parent] # parent en mémoire, récupération
@@ -128,7 +103,6 @@ class NegAlphaBeta_Memory(Player): #optionnel 2
           return memoire['score']
         alpha=max(alpha, memoire["score"])
         if alpha>=beta: self.decision.memory[parent]['pf']=pf; return memoire['score']
-        
     #--------FEUILLE
     if pf == 0 or self.game.over():
       _c = 1 if self.who_am_i == self.game.turn else -1 #coef du résultat (+1 ou -1)
@@ -138,14 +112,11 @@ class NegAlphaBeta_Memory(Player): #optionnel 2
                                   'exact':self.game.over(),
                                   'score':score,
                                   'best_action':None}
-      print('feuille', score)
       return score
-
     #--------PAS FEUILLE
     score=-(self.WIN+1)
     exact=False
     best_action=None
-    
     for a in self.game.actions:
       #----CONFLIT
       if alpha >= beta:
@@ -154,15 +125,11 @@ class NegAlphaBeta_Memory(Player): #optionnel 2
                                     'exact':exact,
                                     'score':score, #aucun score renvoyé car conflit 
                                     'best_action':best_action} 
-        print("parent", parent)
         return beta #retour niveau précédent
-    
       #----PAS CONFLIT => OK
       self.game.move(a)
       parent_fils = self.game.hash_code # ICI - sauvegarde locale info fils
-      print("her we go again")
       _M = - self.__cut(pf-1, -beta, -alpha) # SCORE (_Mesure)
-      print(_M)
       self.game.undo()
       # ICI - maj SI meilleure valeur <=> si alpha est modifié => on retien quel fils est responsable de cette modification
       #il n'y a pas de sauvegarde dans le cas contraire !
@@ -178,8 +145,6 @@ class NegAlphaBeta_Memory(Player): #optionnel 2
                                 'exact':exact,
                                 'score':score,
                                 'best_action':best_action}  
-    print("basic", alpha)
-    print("parent", parent)
     return score
 #===============================================================================#
 
@@ -212,7 +177,6 @@ class IterativeDeepening(Player): #optionnel 2
           _a = self.__old_decision(depth , -_bound , +_bound)
           # print("elapsed {:.2f} depth = {}"
           # "".format(time.time() - _start , depth))
-          
           depth += 1
       return _a
   
@@ -220,20 +184,17 @@ class IterativeDeepening(Player): #optionnel 2
   def __old_decision(self,pf:int,alpha:float,beta:float):
     """ the main method 
     """     
-    
     score = alpha
     parent = self.game.hash_code
     for a in self.game.actions:
       self.game.move(a)
       parent_fils = self.game.hash_code
-      #ICI
       _v_new = - self.__cut(pf-1, alpha, beta)
       self.game.undo()
       if _v_new > score:
         score, b_a = _v_new, a
         score = _v_new
         exact=self.decision.memory[parent_fils]['exact']
-    # ICI
     self.decision.memory[parent]={'pf':pf,
                                 'exact':exact,
                                 'score':score,
@@ -244,10 +205,7 @@ class IterativeDeepening(Player): #optionnel 2
 
   def __cut(self, pf:int, alpha:float, beta:float) -> float:
     """ we use, max thus cut_beta """
-    print("---------")
-    
     parent = self.game.hash_code
-    
     #--------CHECK MEMORY
     if parent in self.decision.memory:
         memoire = self.decision.memory[parent] # parent en mémoire, récupération
@@ -258,19 +216,15 @@ class IterativeDeepening(Player): #optionnel 2
           return memoire['score']
         alpha=max(alpha, memoire["score"])
         if alpha>=beta: self.decision.memory[parent]['pf']=pf; return memoire['score']
-        
     #--------FEUILLE
     if pf == 0 or self.game.over():
       _c = 1 if self.who_am_i == self.game.turn else -1 #coef du résultat (+1 ou -1)
-      # ICI - maj
       score = _c * self.estimation() #(+100 ou -100)
       self.decision.memory[parent]={'pf':pf,
                                   'exact':self.game.over(),
                                   'score':score,
                                   'best_action':None}
-      print('feuille', score)
       return score
-
     #--------PAS FEUILLE
     score=-(self.WIN+1)
     exact=False
@@ -284,15 +238,12 @@ class IterativeDeepening(Player): #optionnel 2
                                     'exact':exact,
                                     'score':score, #aucun score renvoyé car conflit 
                                     'best_action':best_action} 
-        print("parent", parent)
         return beta #retour niveau précédent
     
       #----PAS CONFLIT => OK
       self.game.move(a)
       parent_fils = self.game.hash_code # ICI - sauvegarde locale info fils
-      print("her we go again")
       _M = - self.__cut(pf-1, -beta, -alpha) # SCORE (_Mesure)
-      print(_M)
       self.game.undo()
       # ICI - maj SI meilleure valeur <=> si alpha est modifié => on retien quel fils est responsable de cette modification
       #il n'y a pas de sauvegarde dans le cas contraire !
@@ -308,11 +259,12 @@ class IterativeDeepening(Player): #optionnel 2
                                 'exact':exact,
                                 'score':score,
                                 'best_action':best_action}  
-    print("basic", alpha)
-    print("parent", parent)
     return score    
 #=======================================================================
 class Randy_MC(Player):
+    """
+    Randy avec approche Monte-Carlo
+    """
     def decision(self, state):
         """ get the state """
         self.game.state = state
@@ -338,8 +290,7 @@ class Randy_MC(Player):
 #=======================================================================
 class NegAlphaBeta_MC(Player): 
   """
-  Implémentation similaires à celle de Negamax avec MinMax ;
-  Regrouper coupe_alpha et coupe_beta en 1 seul coupe_alpha qui appelle -coupe_alpha
+  NegAlphaBeta avec Approche Monte-Carlo
   """
   def decision(self, state):
     self.game.state = state # on met à jour l’état du jeu
@@ -391,16 +342,7 @@ class NegAlphaBeta_MC(Player):
 #=======================================================================
 class NegAlphaBeta_Memory_MC(Player): #1 FAIL A CORRIGER
   """
-  Implémentation similaires à celle de Negamax avec MinMax ;
-  Regrouper coupe_alpha et coupe_beta en 1 seul coupe_alpha qui appelle -coupe_alpha
-  Paramètres rattaché à chaque config de memory : 
-    -- pf : la profondeur à laquelle l'état est rencontrée, c'est un entier,
-    -- exact : un booléen qui indique si l'évaluation est exacte ce qui est le cas lorsque la partie
-    est terminée, c'est-à-dire soit parce que on est sur une feuille avec self.game.over() est
-    True, soit parce que l'information a été remontée depuis un état où l'évaluation était exacte.
-    -- score : la valeur de l'évaluation
-    -- best_action : l'action ayant produit le score, lorsqu'il n'y a pas d'action, parce que la
-    partie est terminée, l'action sera None
+  Ajout d'une mémoire à NegAlphaBeta_MC
   """
 
 
@@ -414,15 +356,6 @@ class NegAlphaBeta_Memory_MC(Player): #1 FAIL A CORRIGER
     alpha = -beta
     score, b_a = alpha, None
     pf = self.get_value('pf')
-    #--------Heuristique
-##    clef = self.game.actions
-##    liste_actions = list(self.game.actions)
-##    for a in clef:
-##        if a in self.decision.memory:
-##            if pf == 0 or self.decision.memory[a]['exact']==True : return a
-##            alpha = max(alpha,self.decision.memory[a]['score'])
-##            if alpha >=beta : return a
-##            if self.decision.memory[a]['best_action']!=None:liste_actions.insert(0, liste_actions.pop(a))
     #--------TEST MEMORY
     parent = self.game.hash_code
     if parent in self.decision.memory:
@@ -439,16 +372,7 @@ class NegAlphaBeta_Memory_MC(Player): #1 FAIL A CORRIGER
           L_a = list(self.game.actions) #liste des actions
           id_a = L_a.index(b_a)
           L_a.insert(0, L_a.pop(id_a)) #mets le b_a en première position
-          print(f"""
-                L_a = {L_a}
-                b_a = {b_a}
-                """)
-         
-          #self.game.actions = tuple(L_a)
-          
-          #si on est ici, c'est qu'il y a un truc en memoire MAIS
-          #pas suffisant pour s'arreter, on peut utiliser le score
-          #on peut utiliser best_action (heuristique)
+
     
     #--------MEMOIRE VIDE ou PAS INTERESSANTE ==> GO LES CALCULS 
     #si on est ici c'est qu'on va poursuivre la méthode normale    
@@ -530,15 +454,12 @@ class NegAlphaBeta_Memory_MC(Player): #1 FAIL A CORRIGER
                                     'exact':exact,
                                     'score':score, #aucun score renvoyé car conflit 
                                     'best_action':best_action} 
-        print("parent", parent)
         return beta #retour niveau précédent
     
       #----PAS CONFLIT => OK
       self.game.move(a)
       parent_fils = self.game.hash_code # ICI - sauvegarde locale info fils
-      print("her we go again")
       _M = - self.__cut(pf-1, -beta, -alpha) # SCORE (_Mesure)
-      print(_M)
       self.game.undo()
       # ICI - maj SI meilleure valeur <=> si alpha est modifié => on retien quel fils est responsable de cette modification
       #il n'y a pas de sauvegarde dans le cas contraire !
@@ -554,8 +475,6 @@ class NegAlphaBeta_Memory_MC(Player): #1 FAIL A CORRIGER
                                 'exact':exact,
                                 'score':score,
                                 'best_action':best_action}  
-    print("basic", alpha)
-    print("parent", parent)
     return score
 #=======================================================================
 import numpy as np
@@ -577,28 +496,26 @@ class UCB(Player):
             self.game.undo()
       
         for i in range((_nbSims -1)*len(self.game.actions)):
+            # déterminer idx qui maximise formule UCB
             best_ucb = -1000
             best_action = None
-            # déterminer idx qui maximise formule UCB
             for a in _scores:
                 utilite_a = scoring(a[0],a[1],a[2])
-                ucb_a = utilite_a + 0.3 * np.sqrt(np.log(_nbSims)/(1+i))
+                #ucb_a = utilité  +  C  * sqrt(log(nombre de simu totales)/n-ième essai sur la machine i)
+                ucb_a = utilite_a + 0.3 * np.sqrt(np.log(_nbSims)/(a[0]+a[1]+a[2]))#win + loss + draw
                 if ucb_a > best_ucb:
                     best_action, best_ucb = a, ucb_a
-                    #best_action, best_ucb = self.game.actions[_scores.index(a)], ucb_a
             idx = _scores.index(best_action)
             b = self.game.actions[idx]
             self.game.move(b)
             _resultat = self.simulation(1)
             self.game.undo()
+            
             # mettre à jour _scores [idx] avec _resultat
             _scores[idx] = _resultat
             
-            
         # déterminer a qui maximise formule UCB
-
-        self.game.actions[_scores.index(max([_scores[k][0] for k in range(len(_scores))]))]
-        return a
+        return self.game.actions[idx]
 #====================== exemples de code test ==========================#
 def usage():
     print("""

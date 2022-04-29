@@ -4,8 +4,8 @@
 
 __author__ = "mmc <marc-michel dot corsini at u-bordeaux dot fr>"
 __date__ = "19.02.21"
-__usage__ = "Project 2022: tests jalon 03: AlphaBeta with Memory-Reordering+Monte Carlo"
-__update__ = "27.03.22"
+__usage__ = "Project 2022: tests jalon 03: AlphaBeta with Memory+Monte Carlo"
+__update__ = "07.03.22"
 
 import os
 import unittest
@@ -336,7 +336,31 @@ class TestMemory(unittest.TestCase):
                         _you = getattr(_memory[i], key)
                         
                     self.assertEqual(_you, value, "found {}, expecting {}"
-                                     "".format(_you, value))    
+                                     "".format(_you, value))
+
+    
+    @patch('builtins.print')
+    def test_reordering(self, mock_prn):
+        """ check that actions are reordered """
+        _required = "pf exact score best_action".split()
+        _, _test_dict = self.subtest_data()
+        self.K.decision.memory = {}
+        _1 = self.o.decision( (11, 2) )
+        self.assertEqual(_1, 1, "decision should return 1, found {}"
+                         "".format(_1))
+        # change best_action and test response
+        _memory = self.K.decision.memory
+        if _test_dict:
+            _memory[11]['pf'] = 1
+            _memory[11]['best_action'] = 3
+        else:
+            from collections import namedtuple
+            Fake = namedtuple("fake","pf best_action score exact".split())
+            _memory[11] = Fake(1, 3, 0, False)
+        
+        _2 = self.o.decision( (11, 2) )
+        self.assertEqual(_2, 3, "decision should return 3, found {}"
+                         "".format(_1))
 
 #========================== MC part ===============================#
 class TestAnswersMatches(unittest.TestCase):
