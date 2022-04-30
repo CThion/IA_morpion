@@ -144,13 +144,21 @@ def manche(yellow:Player, red:Player, g:Game) -> tuple:
     print(g)
     yellow.who_am_i = g.turn
     red.who_am_i = g.opponent
-
+    t_yellow = 0; t_red=0 #compteur de temps de jeux des agents pour évaluation rapidité
+    nb_move=0 #compteur nombre total de coup dans la partie
     while not g.over():
         try:
             if g.timer % 2 == 0:
+                start=time.time()
                 x = yellow.decision(g.state)
+                end=time.time()
+                t_yellow += end-start
             else:
+                start=time.time()
                 x = red.decision(g.state)
+                end=time.time()
+                t_red += end-start
+            nb_move+=1
             g.move(x)
         except Exception as _e:
             print("late detection of game over", _e)
@@ -168,7 +176,7 @@ def manche(yellow:Player, red:Player, g:Game) -> tuple:
         else:
             _who = 0 if yellow.who_am_i == g.winner else 1
             _[_who] = g.timer
-        return tuple(_)
+        return tuple(_), t_yellow/nb_move, t_red/nb_move
 
 def partie(yellow:Player, red:Player,
            g:Game, nbParties:int=1) -> Statistics:
@@ -183,10 +191,10 @@ def partie(yellow:Player, red:Player,
     stat = Statistics(yellow.name, _red.name, g)
     for i in range(nbManches):
         if i%2 == 0:
-            _ = manche(yellow, _red, g)
+            _ = manche(yellow, _red, g)[0]
             stat.add_result(_,(yellow.name, _red.name))
         else:
-            _ = manche(_red, yellow, g)
+            _ = manche(_red, yellow, g)[0]
             stat.add_result(_,(_red.name, yellow.name))
     return stat
 
