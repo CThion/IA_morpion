@@ -268,7 +268,7 @@ print(game)
 
 stat = partie(b, a, game, 1)
 stat.statistics
-''' ; testcode(code)
+''' #; testcode(code)
 
 def test_morpion():
     from tools.ezCLI import testcode
@@ -287,8 +287,34 @@ b.decision(_s)
 print(morpion)
 stat = partie(b, a, morpion, 1)
 stat.statistics
-''' ; testcode(code)
+'''; testcode(code)
     
+def test_morpion_2():
+    """test différents agents du jalon 3 sur le jeu du Morpion
+    """
+    # from tools.ezCLI import testcode
+    from morpion import Morpion as m
+    from mes_players import Randy, MinMax, Randy_MC, IterativeDeepening, NegAlphaBeta_Memory
+    
+    morpion = m()
+    
+    a = Randy_MC('alea', morpion)
+    a.who_am_i = morpion.opponent
+    
+    _s = "X...O..OX", 4
+    morpion.valid_state(_s)
+    
+    b = MinMax(2, morpion, pf=5)
+    b.who_am_i = morpion.turn
+    
+    print(morpion)
+    b.decision(_s)
+    print(morpion)
+    stat = partie(b, a, morpion, 1)
+    stat.statistics
+
+
+
 def test_hexapawn():
     from tools.ezCLI import testcode
     from hexapawn import Hexapawn as m
@@ -306,8 +332,33 @@ b.decision(_s)
 print(hexapawn)
 stat = partie(b, a, hexapawn, 1)
 stat.statistics
-''' ; testcode(code)
+''' #; testcode(code)
     
 if __name__ == '__main__':
-    print(usage())
- 
+    # print(usage())
+    # g = jeu.Morpion(5, tore=True) #morpion de taille 5*5 forme torique
+    # a = Randy('a', g)
+    # b = Randy('b', g)
+    # s = manche(a, b, g)
+    # ns = partie(a, b, g, 10)
+    # s.statistics
+    
+    test_morpion_2()
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
