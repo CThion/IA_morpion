@@ -502,7 +502,7 @@ class UCB(Player):
             for a in _scores:
                 utilite_a = scoring(a[0],a[1],a[2])
                 #ucb_a = utilité  +  C  * sqrt(log(nombre de simu totales)/n-ième essai sur la machine i)
-                ucb_a = utilite_a + 0.3 * np.sqrt(np.log(_nbSims)/(a[0]+a[1]+a[2]))#win + loss + draw
+                ucb_a = utilite_a + 0.3 * np.sqrt(np.log(i+1)/(a[0]+a[1]+a[2]))#win + loss + draw
                 if ucb_a > best_ucb:
                     best_action, best_ucb = a, ucb_a
             idx = _scores.index(best_action)
@@ -512,7 +512,9 @@ class UCB(Player):
             self.game.undo()
             
             # mettre à jour _scores [idx] avec _resultat
-            _scores[idx] = _resultat
+            _scores[idx][0] += _resultat[0]
+            _scores[idx][1] += _resultat[1]
+            _scores[idx][2] += _resultat[2]
             
         # déterminer a qui maximise formule UCB
         return self.game.actions[idx]
