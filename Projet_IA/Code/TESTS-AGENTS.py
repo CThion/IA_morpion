@@ -24,7 +24,7 @@ def rapidite(agent, j, jeu):
     """
     j=j
     s = manche(j, agent, jeu)
-    print(s)
+    print(f"statistique : ", s)
     return
 
 def efficacite(agent, jeu):

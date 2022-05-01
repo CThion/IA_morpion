@@ -49,9 +49,8 @@ class Morpion(Game):
 
     def clone(self):
         """ redefined 'coz so different """
-        return self.__class__(self.get_parameter('nbl'),
-                              **{att:self.get_parameter(att)
-                                 for att in "tore phase".split()})
+        return self.__class__(*[self.get_parameter(att)
+                                for att in "nbl tore phase".split()])
 
     @property
     def board(self):

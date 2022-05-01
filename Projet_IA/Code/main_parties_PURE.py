@@ -144,21 +144,13 @@ def manche(yellow:Player, red:Player, g:Game) -> tuple:
     print(g)
     yellow.who_am_i = g.turn
     red.who_am_i = g.opponent
-    t_yellow = 0; t_red=0 #compteur de temps de jeux des agents pour évaluation rapidité
-    nb_move=0 #compteur nombre total de coup dans la partie
+
     while not g.over():
         try:
             if g.timer % 2 == 0:
-                start=time.time()
                 x = yellow.decision(g.state)
-                end=time.time()
-                t_yellow += end-start
             else:
-                start=time.time()
                 x = red.decision(g.state)
-                end=time.time()
-                t_red += end-start
-            nb_move+=1
             g.move(x)
         except Exception as _e:
             print("late detection of game over", _e)
@@ -176,14 +168,13 @@ def manche(yellow:Player, red:Player, g:Game) -> tuple:
         else:
             _who = 0 if yellow.who_am_i == g.winner else 1
             _[_who] = g.timer
-        return tuple(_), t_yellow/nb_move, t_red/nb_move #ajout temps moyens
+        return tuple(_)
 
 def partie(yellow:Player, red:Player,
            g:Game, nbParties:int=1) -> Statistics:
     """ given 2 players,  a board and a number N
         runs 2*N manches and return Statistics
     """
-    T_yellow = 0; T_red=0 #temps moyens de décision
     nbManches = 2 if nbParties <= 1 else 2*nbParties
     if yellow == red:
         _red = red.clone()
@@ -192,14 +183,11 @@ def partie(yellow:Player, red:Player,
     stat = Statistics(yellow.name, _red.name, g)
     for i in range(nbManches):
         if i%2 == 0:
-            _, t_yellow, t_red = manche(yellow, _red, g) #ajout temps moyens
+            _ = manche(yellow, _red, g)
             stat.add_result(_,(yellow.name, _red.name))
-            T_yellow += t_yellow; T_red += t_red #incrémentation temps
         else:
-            _, t_yellow, t_red = manche(_red, yellow, g) #ajout temps moyens
+            _ = manche(_red, yellow, g)
             stat.add_result(_,(_red.name, yellow.name))
-            T_yellow += t_yellow; T_red += t_red #incrémentation temps
-    T_yellow = T_yellow/(2*nbParties); T_red = T_red/(2*nbParties) #calcul temps moyens généraux
     return stat
 
             
@@ -242,6 +230,46 @@ Il y aura 2 manches alea-mmc, le résultat sera une statistique
 >>> test_morpion() # joueur Randy vs MinMax
 """
 
+def test_matches():
+    from tools.ezCLI import testcode
+    from allumettes import Matches as m
+    code = '''
+from mes_players import Randy, MinMax
+game = m(13, False)
+print(game)
+
+a = Randy('alea', game)
+a.who_am_i = game.opponent
+_s = 5, 4
+game.valid_state(_s)
+
+b = MinMax(2, game, pf=5)
+b.who_am_i = game.turn
+print(game)
+b.decision(_s)
+print(game)
+
+stat = partie(b, a, game, 1)
+stat.statistics
+
+game = m(13, True)
+print(game)
+
+a = Randy('alea', game)
+a.who_am_i = game.opponent
+_s = 5, 4
+game.valid_state(_s)
+
+b = MinMax(2, game, pf=5)
+b.who_am_i = game.turn
+print(game)
+b.decision(_s)
+print(game)
+
+stat = partie(b, a, game, 1)
+stat.statistics
+''' ; testcode(code)
+
 def test_morpion():
     from tools.ezCLI import testcode
     from morpion import Morpion as m
@@ -259,36 +287,30 @@ b.decision(_s)
 print(morpion)
 stat = partie(b, a, morpion, 1)
 stat.statistics
-'''; testcode(code)
+''' ; testcode(code)
     
-def test_morpion_2():
-    """test différents agents du jalon 3 sur le jeu du Morpion
-    """
-    # from tools.ezCLI import testcode
-    from morpion import Morpion as m
-    from mes_players import Randy, MinMax, Randy_MC, IterativeDeepening, NegAlphaBeta_Memory
-    
-    morpion = m()
-    
-    a = Randy_MC('alea', morpion)
-    a.who_am_i = morpion.opponent
-    
-    _s = "X...O..OX", 4
-    morpion.valid_state(_s)
-    
-    b = MinMax(2, morpion, pf=5)
-    b.who_am_i = morpion.turn
-    
-    print(morpion)
-    b.decision(_s)
-    print(morpion)
-    stat = partie(b, a, morpion, 1)
-    stat.statistics
-
-
+def test_hexapawn():
+    from tools.ezCLI import testcode
+    from hexapawn import Hexapawn as m
+    code = '''
+from mes_players import Randy, MinMax
+hexapawn = m()
+a = Randy('alea', hexapawn)
+a.who_am_i = hexapawn.opponent
+_s = "X...O..O.", 4
+hexapawn.valid_state(_s)
+b = MinMax(2, hexapawn, pf=3)
+b.who_am_i = hexapawn.turn
+print(hexapawn)
+b.decision(_s)
+print(hexapawn)
+stat = partie(b, a, hexapawn, 1)
+stat.statistics
+''' ; testcode(code)
     
 if __name__ == '__main__':
-    
+    print(usage())
+     
     #----le jeu----
     g = jeu.Morpion(5, tore=True) #morpion de taille 5*5 forme torique
     
@@ -296,39 +318,18 @@ if __name__ == '__main__':
     a = Randy('a', g)
     b = Randy('b', g)
     
-    pf=[k for k in range(1,10)] #différentes valeurs pour la profondeur
+    pf=[_ for _ in range(1,10)] #différentes valeurs pour la profondeur
     nbSim=[_ for _ in range(100, 10000, 100)] #et pour le nombre de simulations
     
-    #--
-    toto_MMC = NegAlphaBeta_Memory_MC('toto', g, pf=pf[0], nbSim=nbSim[0])
-    #--
-    toto_M = NegAlphaBeta_Memory('toto', g, pf=pf[2])
-    #--
-    toto_MC =NegAlphaBeta_MC('toto', g, nbSim=nbSim[9])
     
+    toto_MMC = NegAlphaBeta_Memory_MC('toto', g, pf=pf[0], nbSim=nbSim[0])
+    toto_M = NegAlphaBeta_Memory('toto', g, pf=pf[3])
+    toto_MC =NegAlphaBeta_MC('toto', g, nbSim=3)
     #----FIGHT!----
-    s = manche(a, toto_MC, g) #une seule partie
+    s = manche(a, toto_M, g) #une seule partie
     #ns = partie(a, toto_MC, g, 3) #plein de parties
     
     #----les résultats----
     #print(ns.statistics)
     
     #test_morpion()
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
