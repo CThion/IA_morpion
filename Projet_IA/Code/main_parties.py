@@ -21,7 +21,7 @@ except Exception as _e:
     
 # initialisation
 if len(sys.argv) == 1:
-    param = "morpion" # input("quel est le fichier de description du jeu ? ")
+    param = "morpion" #"hexapawn" # input("quel est le fichier de description du jeu ? ")
     if not os.path.isfile(param): ValueError("need a python file")
 else: param = sys.argv[1]
 
@@ -145,7 +145,7 @@ def manche(yellow:Player, red:Player, g:Game) -> tuple:
     yellow.who_am_i = g.turn
     red.who_am_i = g.opponent
     t_yellow = 0; t_red=0 #compteur de temps de jeux des agents pour évaluation rapidité
-    nb_move=0 #compteur nombre total de coup dans la partie
+    nb_move=1 #compteur nombre total de coup dans la partie
     while not g.over():
         try:
             if g.timer % 2 == 0:
@@ -195,12 +195,14 @@ def partie(yellow:Player, red:Player,
             _, t_yellow, t_red = manche(yellow, _red, g) #ajout temps moyens
             stat.add_result(_,(yellow.name, _red.name))
             T_yellow += t_yellow; T_red += t_red #incrémentation temps
+            print(T_yellow)
         else:
-            _, t_yellow, t_red = manche(_red, yellow, g) #ajout temps moyens
+            _, t_red, t_yellow = manche(_red, yellow, g) #ajout temps moyens
             stat.add_result(_,(_red.name, yellow.name))
             T_yellow += t_yellow; T_red += t_red #incrémentation temps
+            print(T_yellow)
     T_yellow = T_yellow/(2*nbParties); T_red = T_red/(2*nbParties) #calcul temps moyens généraux
-    return stat
+    return stat, T_yellow, T_red
 
             
 def usage() -> str:
@@ -290,7 +292,8 @@ def test_morpion_2():
 if __name__ == '__main__':
     
     #----le jeu----
-    g = jeu.Morpion(5, tore=True) #morpion de taille 5*5 forme torique
+    g = jeu.Morpion(3, tore=False) #morpion de taille 5*5 forme torique
+    #g = jeu.Hexapawn()
     
     #----les joueurs----
     a = Randy('a', g)
@@ -304,10 +307,13 @@ if __name__ == '__main__':
     #--
     toto_M = NegAlphaBeta_Memory('toto', g, pf=pf[2])
     #--
-    toto_MC =NegAlphaBeta_MC('toto', g, nbSim=nbSim[9])
+    toto_MC =NegAlphaBeta_MC('toto', g, pf=pf[2], nbSim=nbSim[4])
+    
+    
+    # print(toto_MC.decision(g.state))
     
     #----FIGHT!----
-    s = manche(a, toto_MC, g) #une seule partie
+    #s = manche(a, toto_MC, g) #une seule partie
     #ns = partie(a, toto_MC, g, 3) #plein de parties
     
     #----les résultats----
@@ -316,8 +322,20 @@ if __name__ == '__main__':
     #test_morpion()
     
     
+    a.who_am_i = g.opponent
+    _s = "X...O..OX", 4
+    g.valid_state(_s)
     
+    toto_MC.who_am_i = g.turn
+    print(g)
+    toto_MC.decision(_s)
+    print(g)
     
+    s = manche(a, toto_MC, g) #une seule partie
+    print(s)
+    
+    stat = partie(a, toto_MC, g, 1)
+    stat[0].statistics
     
     
     
