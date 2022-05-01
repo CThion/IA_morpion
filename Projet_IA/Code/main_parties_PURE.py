@@ -146,14 +146,11 @@ def manche(yellow:Player, red:Player, g:Game) -> tuple:
     red.who_am_i = g.opponent
 
     while not g.over():
-        try:
-            if g.timer % 2 == 0:
-                x = yellow.decision(g.state)
-            else:
-                x = red.decision(g.state)
-            g.move(x)
-        except Exception as _e:
-            print("late detection of game over", _e)
+        if g.timer % 2 == 0:
+            x = yellow.decision(g.state)
+        else:
+            x = red.decision(g.state)
+        g.move(x)
 
     print("final Game\n{}".format(g))
     print("waiting ...", end='')
@@ -307,29 +304,116 @@ print(hexapawn)
 stat = partie(b, a, hexapawn, 1)
 stat.statistics
 ''' ; testcode(code)
+
+def fight(agent1, agent2, nbPartie):
+    """
+    """
+    g = jeu.Morpion(3, tore=False)
+    agent1.who_am_i = g.opponent
+    agent2.who_am_i = g.turn
+    stat = partie(agent1, agent2, g, nbPartie)
+    return stat
+
+
     
 if __name__ == '__main__':
-    print(usage())
-     
-    #----le jeu----
-    g = jeu.Morpion(5, tore=True) #morpion de taille 5*5 forme torique
     
-    #----les joueurs----
-    a = Randy('a', g)
-    b = Randy('b', g)
+    # #----le jeu----
+    # g = jeu.Morpion(3, tore=False) #morpion de taille 5*5 forme torique
     
-    pf=[_ for _ in range(1,10)] #différentes valeurs pour la profondeur
+    # #----les paramètres
+    pf=[k for k in range(1,10)] #différentes valeurs pour la profondeur
     nbSim=[_ for _ in range(100, 10000, 100)] #et pour le nombre de simulations
     
+    # #----les joueurs
+    # Agents = {
+    # 'randy' : Randy('randy', g),
+    # #--
+    # 'minmax' : MinMax('minmax', g),
+    # #--
+    # 'toto_MMC' : NegAlphaBeta_Memory_MC('toto_MMC', g, pf=pf[0], nbSim=nbSim[0]),
+    # #--
+    # 'toto_M': NegAlphaBeta_Memory('toto_M', g, pf=pf[0]),
+    # #--
+    # 'toto_MC' :NegAlphaBeta_MC('toto_MC', g, pf=pf[0], nbSim=nbSim[0]),
+    # #--
+    # 'toto_UCB' : UCB('toto_UCB', g, pf=pf[0], nbSim=nbSim[0])}
+
     
-    toto_MMC = NegAlphaBeta_Memory_MC('toto', g, pf=pf[0], nbSim=nbSim[0])
-    toto_M = NegAlphaBeta_Memory('toto', g, pf=pf[3])
-    toto_MC =NegAlphaBeta_MC('toto', g, nbSim=3)
-    #----FIGHT!----
-    s = manche(a, toto_M, g) #une seule partie
-    #ns = partie(a, toto_MC, g, 3) #plein de parties
+    # advers=[randy, minmax]
+    # agents=[MMC, M, MC, UCB]
+    # STATS=[]
+    # # for agent in advers:
+    # #     for advers in agents:
+    # #         STATS.append(fight(agent, advers, 4))
+    # # print(STATS)
     
-    #----les résultats----
-    #print(ns.statistics)
+    # #STATS.append(fight(agents[0], advers[0], 4))
     
-    #test_morpion()
+    # # f3=fight(randy,MC,2)
+    # # f4=fight(minmax,MC,2)
+    # f3=fight(randy,M,2)
+    # # f4=fight(minmax,M,2)
+    # # f5=fight(randy,UCB,2)
+    # # f6=fight(minmax,UCB,2)
+    
+    # # f1=fight(randy,MMC,2)
+    # # f2=fight(minmax,MMC,2)
+    
+    # #===============
+    
+    # # a.who_am_i = g.opponent
+    # # _s = "X...O..OX", 4
+    # # g.valid_state(_s)
+    
+    # # toto_MC.who_am_i = g.turn
+    # # print(g)
+    # # toto_MC.decision(_s)
+    # # print(g)
+    
+    # # stat = partie(a, toto_MC, g, 3)
+    # # stat[0].statistics
+    # # print(stat)
+    
+    # # jeu = jeu.Morpion(3, tore=False) #morpion de taille 3*3 forme non torique
+    # # Agents=[NegAlphaBeta_Memory('toto', jeu, pf=2), UCB('toto', jeu, nbSim=500), NegAlphaBeta_Memory_MC('toto', jeu, pf=2, nbSim=500)] #agents testés
+    # # Advers=[Randy('randy', jeu), MinMax('minmax', jeu, pf=2)]
+    
+    
+    
+    # # print(rapidite(Agents, Advers, jeu, 10))
+    
+    
+    # #==========================================PERFORMANCES
+    
+    
+    # MMC = NegAlphaBeta_Memory_MC('toto_MMC', g, pf=pf[0], nbSim=nbSim[0])
+    # M = NegAlphaBeta_Memory('toto_M', g, pf=pf[0])
+    # MC = NegAlphaBeta_MC('toto_MC', g, pf=pf[0], nbSim=nbSim[0])
+    # UCB = UCB('toto_UCB', g, pf=pf[0], nbSim=nbSim[0])   
+    
+    #====MEMORY====
+    #==randy
+    g0 = jeu.Morpion(3, tore=False)
+    randy = Randy('randy', g0)
+    M = NegAlphaBeta_Memory('toto_M', g0, pf=pf[0])
+    randy.who_am_i = g0.opponent
+    M.who_am_i = g0.turn
+    stat0 = partie(randy, M, g0, 10)
+    print(stat0.statistics)
+    #==minmax
+    g1 = jeu.Morpion(3, tore=False)
+    minmax = MinMax('randy', g1)
+    M = NegAlphaBeta_Memory('toto_M', g1, pf=pf[0])
+    randy.who_am_i = g1.opponent
+    M.who_am_i = g1.turn
+    stat1 = partie(minmax, M, g1, 10)
+    print(stat1.statistics)
+
+    
+    
+    # randy.who_am_i = g.opponent
+    # UCB.who_am_i = g.turn
+    # stat1 = partie(randy, M, g, 10)
+    # print(stat.statistics)
+    

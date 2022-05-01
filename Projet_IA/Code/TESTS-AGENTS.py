@@ -17,15 +17,17 @@ from morpion import Morpion
 
 #--------
  
-def rapidite(agent, j, jeu):
+def rapidite(Agents, Advers, jeu, nbPartie):
     
-    """teste la rapidité de l'agent
-    Co
+    """teste le paramètre de rapidité entre deux agents
     """
-    j=j
-    s = manche(j, agent, jeu)
-    print(f"statistique : ", s)
-    return
+    Stats = {}
+    for agent in Agents:
+        for advers in Advers:
+            stat=partie(advers, agent, jeu, nbPartie)            
+            Stat[f"{agent}-VS-{advers}"]=tuple(stat[1], stat[2])
+            print(f"statistique : ", stat)
+    return Stat
 
 def efficacite(agent, jeu):
     """teste l'efficacité de l'agent
@@ -37,22 +39,16 @@ if __name__=="__main__":
     """
     tests de l'intelligence d'agents sur le jeu Morpion
     """
-    jeu = Morpion()
-    Agents=[Randy('randy', jeu), MinMax('minmax', jeu, pf=3), 
-            NegAlphaBeta_Memory('toto', jeu, pf=3), UCB('toto', jeu, nbSim=1000), NegAlphaBeta_Memory_MC('toto', jeu, pf=3, nbSim=1000)] #agents testés
+    jeu = Morpion(3, tore=False) #morpion de taille 3*3 forme non torique
+    Agents=[NegAlphaBeta_Memory('toto', jeu, pf=2), UCB('toto', jeu, nbSim=500), NegAlphaBeta_Memory_MC('toto', jeu, pf=2, nbSim=500)] #agents testés
+    Advers=[Randy('randy', jeu), MinMax('minmax', jeu, pf=2)]
     
-    rapidite(Agents[2], Agents[1], jeu)
-    
-    
+    print(rapidite(Agents, Advers, jeu, 10))
     
     
-    #----evaluation des trois agents
-    # for agent in Agents:
-    #     print(f"""
-    #           Evaluation de {agent} :
-    #           """)
-    #     rapidite(agent, jeu)
-    #     efficacite(agent, jeu)
+    
+    
+    
         
         
         

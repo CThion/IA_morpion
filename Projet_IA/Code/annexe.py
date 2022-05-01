@@ -169,7 +169,7 @@ def manche(yellow:Player, red:Player, g:Game) -> tuple:
     print(" Done")
 
     if g.winner is None: # a draw
-        return (g.timer/2, g.timer/2)
+        return (g.timer/2, g.timer/2), t_yellow/nb_move, t_red/nb_move #ajout temps moyens
     else:
         _ = [0, 0]
         if isinstance(g.winner, int): _[g.winner] = g.timer
@@ -203,8 +203,7 @@ def partie(yellow:Player, red:Player,
             print(T_yellow)
     T_yellow = T_yellow/(2*nbParties); T_red = T_red/(2*nbParties) #calcul temps moyens généraux
     return stat, T_yellow, T_red
-
-            
+           
 def usage() -> str:
     return """
 Vous devez créer un 'Game', par exemple
@@ -287,55 +286,106 @@ def test_morpion_2():
     stat = partie(b, a, morpion, 1)
     stat.statistics
 
-
+def rapidite(Agents, Advers, jeu, nbPartie):
     
+    """teste le paramètre de rapidité entre deux agents
+    """
+    Stats = {}
+    for agent in Agents:
+        for advers in Advers:
+            stat=partie(advers, agent, jeu, nbPartie)            
+            Stat[f"{agent}-VS-{advers}"]=tuple(stat[1], stat[2])
+            print(f"statistique : ", stat)
+    return Stat
+
+def fight(agent1, agent2, nbPartie):
+    """
+    """
+    g = jeu.Morpion(3, tore=False)
+    agent1.who_am_i = g.opponent
+    _s = "X...O..OX", 4
+    g.valid_state(_s)
+    agent2.who_am_i = g.turn
+    agent2.decision(_s)
+    stat = partie(agent1, agent2, g, nbPartie)
+    return stat
+
 if __name__ == '__main__':
     
     #----le jeu----
     g = jeu.Morpion(3, tore=False) #morpion de taille 5*5 forme torique
-    #g = jeu.Hexapawn()
     
-    #----les joueurs----
-    a = Randy('a', g)
-    b = Randy('b', g)
-    
+    #----les paramètres
     pf=[k for k in range(1,10)] #différentes valeurs pour la profondeur
     nbSim=[_ for _ in range(100, 10000, 100)] #et pour le nombre de simulations
     
+    #----les joueurs
+    Agents = {
+    'randy' : Randy('randy', g),
     #--
-    toto_MMC = NegAlphaBeta_Memory_MC('toto', g, pf=pf[0], nbSim=nbSim[0])
+    'minmax' : MinMax('minmax', g),
     #--
-    toto_M = NegAlphaBeta_Memory('toto', g, pf=pf[2])
+    'toto_MMC' : NegAlphaBeta_Memory_MC('toto_MMC', g, pf=pf[0], nbSim=nbSim[0]),
     #--
-    toto_MC =NegAlphaBeta_MC('toto', g, pf=pf[2], nbSim=nbSim[4])
+    'toto_M': NegAlphaBeta_Memory('toto_M', g, pf=pf[0]),
+    #--
+    'toto_MC' :NegAlphaBeta_MC('toto_MC', g, pf=pf[0], nbSim=nbSim[0]),
+    #--
+    'toto_UCB' : UCB('toto_UCB', g, pf=pf[0], nbSim=nbSim[0])}
+    
+    randy = Randy('randy', g); minmax=MinMax('minmax', g, pf=2)
+    MMC = NegAlphaBeta_Memory_MC('toto_MMC', g, pf=pf[0], nbSim=nbSim[0])
+    M = NegAlphaBeta_Memory('toto_M', g, pf=pf[0])
+    MC = NegAlphaBeta_MC('toto_MC', g, nbSim=nbSim[0])
+    UCB = UCB('toto_UCB', g, nbSim=nbSim[0])
+    
+    advers=[randy, minmax]
+    agents=[MMC, M, MC, UCB]
+    STATS=[]
+    # for agent in advers:
+    #     for advers in agents:
+    #         STATS.append(fight(agent, advers, 4))
+    # print(STATS)
+    
+    #STATS.append(fight(agents[0], advers[0], 4))
+    
+    # f3=fight(randy,MC,2)
+    # f4=fight(minmax,MC,2)
+    f3=fight(randy,UCB,2)
+    
+    # f4=fight(minmax,M,2)
+    # f5=fight(randy,UCB,2)
+    # f6=fight(minmax,UCB,2)
+    
+    # f1=fight(randy,MMC,2)
+    # f2=fight(minmax,MMC,2)
+    
+    #===============
+    
+    # a.who_am_i = g.opponent
+    # _s = "X...O..OX", 4
+    # g.valid_state(_s)
+    
+    # toto_MC.who_am_i = g.turn
+    # print(g)
+    # toto_MC.decision(_s)
+    # print(g)
+    
+    # stat = partie(a, toto_MC, g, 3)
+    # stat[0].statistics
+    # print(stat)
+    
+    # jeu = jeu.Morpion(3, tore=False) #morpion de taille 3*3 forme non torique
+    # Agents=[NegAlphaBeta_Memory('toto', jeu, pf=2), UCB('toto', jeu, nbSim=500), NegAlphaBeta_Memory_MC('toto', jeu, pf=2, nbSim=500)] #agents testés
+    # Advers=[Randy('randy', jeu), MinMax('minmax', jeu, pf=2)]
     
     
-    # print(toto_MC.decision(g.state))
     
-    #----FIGHT!----
-    #s = manche(a, toto_MC, g) #une seule partie
-    #ns = partie(a, toto_MC, g, 3) #plein de parties
-    
-    #----les résultats----
-    #print(ns.statistics)
-    
-    #test_morpion()
+    # print(rapidite(Agents, Advers, jeu, 10))
     
     
-    a.who_am_i = g.opponent
-    _s = "X...O..OX", 4
-    g.valid_state(_s)
+    #==========================================PERFORMANCES
     
-    toto_MC.who_am_i = g.turn
-    print(g)
-    toto_MC.decision(_s)
-    print(g)
-    
-    s = manche(a, toto_MC, g) #une seule partie
-    print(s)
-    
-    stat = partie(a, toto_MC, g, 1)
-    stat[0].statistics
     
     
     
